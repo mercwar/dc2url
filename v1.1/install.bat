@@ -87,6 +87,8 @@ echo                     [SUCCESS] installed 'dc2url.bat' successfully.
 echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%%BG_GLASS%
 
 reg add "HKCU\Software\dc2url\Launcher" /f /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
+reg add "HKCU\Software\dc2url\Launcher" /f /v "NetworkSubsystem" /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2ws2.dll" >nul 2>&1
+reg add "HKCU\Software\dc2url\Launcher" /f /v "HeadlessEngine" /t REG_SZ /d "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
 
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
@@ -113,6 +115,7 @@ for %%H in (HKLM HKCU) do (
         reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
     )
 )
+
 
 echo %O2%        [AVIS] Saving config and completing registration...%RESET%%BG_GLASS%
 
