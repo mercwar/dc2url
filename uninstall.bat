@@ -112,10 +112,6 @@ echo %R2%        [*] Deleting Eclipse application files...%RESET%%BG_GLASS%
 
 if exist "%FINAL_EXEC_DIR%\eclipse.exe" del /f /q "%FINAL_EXEC_DIR%\eclipse.exe" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\menu.json" del /f /q "%FINAL_EXEC_DIR%\menu.json" >nul 2>&1
-if exist "%FINAL_EXEC_DIR%\dc2url.exe" del /f /q "%FINAL_EXEC_DIR%\dc2url.exe" >nul 2>&1
-if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" del /f /q "%FINAL_EXEC_DIR%\dc2ws2.dll" >nul 2>&1
-if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
-if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" del /f /q "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
 
 :: Clean up directory tree nodes only if they are now totally empty
 rmdir "%FINAL_EXEC_DIR%" >nul 2>&1
