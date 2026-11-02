@@ -169,7 +169,7 @@ if exist "%TARGET%\eclipse.ico" (
 :: =========================================================================
 :: SHORTCUT CREATION (Safe VBScript Engine Delivery)
 :: =========================================================================
-echo %O2%    [*] Generating Desktop shortcut...%RESET%
+echo %O2%    [*] Generating Desktop and Start Menu shortcuts...%RESET%
 set "VBS_SCRIPT=%TEMP%\make_eclipse_lnk.vbs"
 if exist "%VBS_SCRIPT%" del /f /q "%VBS_SCRIPT%" >nul 2>&1
 
@@ -177,6 +177,9 @@ echo Set ws = CreateObject("WScript.Shell") > "%VBS_SCRIPT%"
 echo Set fso = CreateObject("Scripting.FileSystemObject") >> "%VBS_SCRIPT%"
 echo ico = "%FINAL_EXEC_DIR%\eclipse.ico" >> "%VBS_SCRIPT%"
 echo If Not fso.FileExists(ico) Then ico = "%TARGET%\eclipse.ico" >> "%VBS_SCRIPT%"
+echo dim d, p, lnk, startLnk >> "%VBS_SCRIPT%"
+echo. >> "%VBS_SCRIPT%"
+echo Rem 1. Create Desktop Shortcut >> "%VBS_SCRIPT%"
 echo d = ws.SpecialFolders("Desktop") >> "%VBS_SCRIPT%"
 echo If fso.FolderExists(d) Then >> "%VBS_SCRIPT%"
 echo     Set lnk = ws.CreateShortcut(d ^& "\Eclipse.lnk") >> "%VBS_SCRIPT%"
@@ -184,6 +187,16 @@ echo     lnk.TargetPath = "%FINAL_EXE_PATH%" >> "%VBS_SCRIPT%"
 echo     lnk.WorkingDirectory = "%FINAL_EXEC_DIR%" >> "%VBS_SCRIPT%"
 echo     If fso.FileExists(ico) Then lnk.IconLocation = ico ^& ",0" >> "%VBS_SCRIPT%"
 echo     lnk.Save >> "%VBS_SCRIPT%"
+echo End If >> "%VBS_SCRIPT%"
+echo. >> "%VBS_SCRIPT%"
+echo Rem 2. Create Start Menu Programs Shortcut >> "%VBS_SCRIPT%"
+echo p = ws.SpecialFolders("Programs") >> "%VBS_SCRIPT%"
+echo If fso.FolderExists(p) Then >> "%VBS_SCRIPT%"
+echo     Set startLnk = ws.CreateShortcut(p ^& "\Eclipse.lnk") >> "%VBS_SCRIPT%"
+echo     startLnk.TargetPath = "%FINAL_EXE_PATH%" >> "%VBS_SCRIPT%"
+echo     startLnk.WorkingDirectory = "%FINAL_EXEC_DIR%" >> "%VBS_SCRIPT%"
+echo     If fso.FileExists(ico) Then startLnk.IconLocation = ico ^& ",0" >> "%VBS_SCRIPT%"
+echo     startLnk.Save >> "%VBS_SCRIPT%"
 echo End If >> "%VBS_SCRIPT%"
 
 cscript //nologo "%VBS_SCRIPT%" >nul 2>&1
