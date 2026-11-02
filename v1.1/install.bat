@@ -1,4 +1,5 @@
 @echo off
+setlocal EnableDelayedExpansion
 
 :: InstallShield Subsystem: Force Elevated Administrative Token Context
 :: -----------------------------------------------------------------------------
@@ -10,7 +11,6 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteSetup )
     exit /b
 
 :ExecuteSetup
-setlocal EnableDelayedExpansion
 
 :: =========================================================================
 :: DIRECTORY RESOLUTION MAPPING (MANIFEST LAYOUT)
@@ -53,10 +53,10 @@ cls
 
 echo.
 echo %O1%      ######   #####  ######  ##  ##  #####  ######  ###   ### ###### %RESET%%BG_GLASS%
-echo %O2%      ##   ## ##   ## ##   ## ## ##   ##     ##   ## #### ####     ## %RESET%%BG_GLASS%
+echo %O2%      ##   ## ##   ## ##   ## ## ##   ##     ##   ## #### ####      ## %RESET%%BG_GLASS%
 echo %O3%      ##   ## ####### ######  #####   ##     ##   ## ## ### ##  ##### %RESET%%BG_GLASS%
-echo %Y1%      ##   ## ##   ## ##   ## ##  ##  ##     ##   ## ##     ##      ## %RESET%%BG_GLASS%
-echo %Y2%      ######  ##   ## ##   ## ##  ##   #####  #####  ##     ## ####### %RESET%%BG_GLASS%
+echo %Y1%      ##   ## ##   ## ##   ## ##  ##  ##     ##   ## ##      ##      ## %RESET%%BG_GLASS%
+echo %Y2%      ######  ##   ## ##   ## ##  ##   #####  #####  ##      ## ####### %RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
@@ -72,18 +72,18 @@ if not exist "%FINAL_EXE_PATH%" (
 
 echo %O2%        [*] Processing OLE/COM and System DLL Registrations...%RESET%%BG_GLASS%
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
-    echo                     [SUCCESS] dc2ws2.dll network subsystem ready.
+                       [SUCCESS] dc2ws2.dll network subsystem ready.
 )
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
-    echo                     [SUCCESS] DarkComHeadless.dll ready.
+                       [SUCCESS] DarkComHeadless.dll ready.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
-    echo                     [SUCCESS] WebView2Loader.dll ready.
+                       [SUCCESS] WebView2Loader.dll ready.
 )
 
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                     [SUCCESS] installed 'dc2url.bat' successfully.
+                       [SUCCESS] installed 'dc2url.bat' successfully.
 
 echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%%BG_GLASS%
 
@@ -113,10 +113,9 @@ for %%H in (HKLM HKCU) do (
         reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
         reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
         reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
+        reg add "HKH%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
     )
 )
-
 
 echo %O2%        [AVIS] Saving config and completing registration...%RESET%%BG_GLASS%
 
@@ -127,7 +126,7 @@ powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','Use
 
 powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
-echo                     [SUCCESS] dc2url is now fully installed and at your command!
+                       [SUCCESS] dc2url is now fully installed and at your command!
 echo.
 
 set "MIDI_OUTPUT=%BASE_DIR%\sound\transformers.mid"
@@ -144,7 +143,6 @@ for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v "Sound
 if /i "%SOUND_SETTING%"=="on" (
     if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%" >nul 2>&1
     
-    :: FIXED: Invoke the binary using its absolute target directory path to bypass the local cache window delay
     "%FINAL_EXEC_DIR%\dc2url.exe" -s -dc2ws2 "%MIDI_URL%" -o "%MIDI_OUTPUT%"
     
     echo.
@@ -176,8 +174,8 @@ echo.
 
 if not exist "%BASE_DIR%\setup.bat" goto :no_setup
 
-choice /c YN /n /m "%O2%        [?] Update/Install/Re-install Eclipse for dc2url v1.1 ? (Y/N)%RESET%%BG_GLASS%"
-
+echo %O2%        [?] Update/Install/Re-install Eclipse for dc2url v1.1 ? (Y/N)%RESET%%BG_GLASS%
+choice /c YN /n
 if errorlevel 2 goto :skip_setup
 if errorlevel 1 goto :run_setup
 
