@@ -1,7 +1,7 @@
 {
   "repo_owner": "mercwar",
   "repo_name": "dc2url",
-  "version": "v1.0",
+  "version": "v1.1",
   "do_not_version": "root_files",
   "manifest_layout": {
     "root_files": [
