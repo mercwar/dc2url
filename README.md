@@ -11,7 +11,11 @@
 
 # ✨ dc2url powerd by ⚡ Dark-Com-2  
 
-#####  DARK-COM-2 :: High-Performance  
+
+![dc24](images/dc2url.png)
+
+
+#####  🌈 DARK-COM-2 :: High-Performance  
 
 ![dc24](images/dc2ws2.jpg)
 
