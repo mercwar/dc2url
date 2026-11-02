@@ -276,7 +276,7 @@ if (-not (Get-FreshScript -FileName $LauncherFile -DestinationPath $TempInstalle
     exit 1
 }
 
-Show-GraphicalProgress -TaskTitle "Initializing Subsystems" -DurationMs 1800
+Show-GraphicalProgress -TaskTitle "Initializing Subsystems, You can close this window." -DurationMs 1800
 
 try {
     Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$TempInstaller`"" -Wait -NoNewWindow -ErrorAction Stop
