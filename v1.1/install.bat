@@ -30,6 +30,7 @@ set "MIDI_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/sound/transf
 cd /d "%FINAL_EXEC_DIR%"
 
 title InstallShield (R) Setup Launcher v1.0 :: dc2url Master Deployment Engine
+
 mode con: cols=120 lines=34
 
 chcp 65001 >nul 2>&1
@@ -182,8 +183,6 @@ if errorlevel 1 goto :run_setup
 
 :run_setup
 echo %O2%        [*] Launching local setup...%RESET%%BG_GLASS%
-cd /d "%BASE_DIR%"
-timeout /t 1 >nul
 call "%BASE_DIR%\setup.bat"
 goto :setup_end
 
