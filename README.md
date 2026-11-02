@@ -17,7 +17,6 @@
 #
 
 ##  🌈 dc2ws2 Performance  
-
 ![dc24](images/dc2ws2.jpg)
 
 
