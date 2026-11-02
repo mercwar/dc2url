@@ -129,7 +129,7 @@ darkcom2.exe --request POST --data "{\"action\":\"test_long_flags\"}" http://loc
 ## 🛠️ System Requirements & Deployment
 
 
-![dc22](./images/ss-dc2i.png)
+![dc22](./images/ssndc.png)
 
 * **Operating System:** Windows 10 or Windows 11 (64-bit x64 architecture).
 * **Runtime Dependency:** Microsoft Edge WebView2 Evergreen Runtime.
