@@ -16,7 +16,7 @@ $ErrorActionPreference = 'Stop'
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
 
 # Clean presentation setup
-$host.UI.RawUI.WindowTitle = "MERCWAR dc2URL & Eclipse Launcher v1.0"
+$host.UI.RawUI.WindowTitle = "Mercwar AI dc2url & Eclipse Launcher v1.1"
 try {
     $host.UI.RawUI.BufferSize = [System.Management.Automation.Host.Size]::new(100, 40)
     $host.UI.RawUI.WindowSize = [System.Management.Automation.Host.Size]::new(100, 40)
@@ -174,7 +174,7 @@ if ($isInstalled) {
     
     Write-Host "  [AVIS ECLIPSE] Select operational mode:" -ForegroundColor Yellow
     Write-Host "    [1] Install/Reinstall Eclipse (Fresh setup)"    -ForegroundColor White
-    Write-Host "    [2] Update/Reinstall dc2URL (Fresh launcher)" -ForegroundColor White
+    Write-Host "    [2] Reinstall dc2URL (Fresh launcher)" -ForegroundColor White
     Write-Host "    [3] Purge dc2url/ECLIPSE (Use Windows add/remove First!)"       -ForegroundColor White
     Write-Host "    [4] Exit"                                     -ForegroundColor White
     Write-Host ""
@@ -281,6 +281,8 @@ try {
         Remove-Item $TempInstaller -Force -ErrorAction SilentlyContinue
     }
 }
+
+Write-Footer
 
 # Render bottom UI layout lines
 Write-Footer
