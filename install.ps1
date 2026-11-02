@@ -123,8 +123,10 @@ function Get-FreshScript {
         # Cache-Control no-cache header ensures GitHub raw proxies deliver fresh code
         Invoke-WebRequest -Uri $remoteUrl -OutFile $DestinationPath -UseBasicParsing -Headers @{"Cache-Control"="no-cache, no-store, must-revalidate"}
         Write-Host "  [Mercwar AI SUCCESS] copy of $FileName saved to disk." -ForegroundColor White
+        Write-Host "  [AVIS ECLIPSE] You can close this window after your installer loads.." -ForegroundColor Yellow
         return $true
     } catch {
+    
         Write-Host "  [Mercwar AI ERROR] Failed to download fresh copy of $FileName from $remoteUrl : $_" -ForegroundColor Red
         return $false
     }
