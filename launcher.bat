@@ -1,25 +1,23 @@
 @echo off
-setlocal EnableDelayedExpansion
-chcp 65001 >nul 2>&1
+:: InstallShield Subsystem: Force Elevated Administrative Token Context
+:: -----------------------------------------------------------------------------
+>nul 2>&1 "%SYSTEMROOT%\system32\cacls.exe" "%SYSTEMROOT%\system32\config\system"
+if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteSetup )
 
-:: ============================================================
-:: SELF-ELEVATION PIPELINE (REQUIRES ADMIN FOR PROGRAM FILES)
-:: ============================================================
-net session >nul 2>&1
-if %errorlevel% neq 0 (
-    powershell -Command "Start-Process -FilePath 'cmd.exe' -ArgumentList '/c', 'cd /d ""%~dp0"" && ""%~f0""' -Verb RunAs"
+:RequestUAC
+    powershell -Command "Start-Process '%~f0' -Verb RunAs -WorkingDirectory '%~dp0'"
     exit /b
-)
 
-cd /d "%~dp0"
+:ExecuteSetup
+setlocal EnableDelayedExpansion
 
-:: InstallShield Setup Configuration Properties: Title Block & Bounds
-title InstallShield (R) Setup Launcher v1.1 :: dc2url Master Deployment Engine
-mode con: cols=120 lines=34
-color 0E
+:: =========================================================================
+:: DIRECTORY RESOLUTION MAPPING & CONFIG.JSON VERSION DISCOVERY
+:: =========================================================================
+set "ROOT_DIR=%~dp0"
+set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/config.json"
+set "TEMP_CONFIG=%TEMP%\dc2url_config.json"
 
-:: Force TrueColor Console Canvas Context Allocation
-reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
 for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
 set "RESET=%E%[0m"
 set "BG_GLASS=%E%[48;2;10;10;12m"
@@ -28,291 +26,198 @@ set "O2=%E%[38;2;255;110;0m"
 set "O3=%E%[38;2;255;153;0m"
 set "Y1=%E%[38;2;255;200;0m"
 set "Y2=%E%[38;2;255;235;0m"
+set "G2=%E%[38;2;80;235;155m"
 set "TXT=%E%[38;2;240;240;240m"
-set "GRAY=%E%[38;2;115;125;145m"
-set "GREEN=%E%[38;2;90;255;120m"
 
 cls
 echo %BG_GLASS%
 cls
-
 echo.
-echo %O1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%%BG_GLASS%
-echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
-echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
-echo %Y1%        ██║  ██║██╔══██║██╔══██║██╔-██╗ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
-echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
+echo. 
+echo  %G2%  [Eclipse] Downloading current version, please wait..%RESET%%BG_GLASS%
+
+if exist "%TEMP_CONFIG%" del /f /q "%TEMP_CONFIG%" >nul 2>&1
+dc2url -l -dc2ws2 -s "%CONFIG_URL%" -o "%TEMP_CONFIG%"
+
+set "VERSION_TAG=v1.1"
+if exist "%TEMP_CONFIG%" (
+    for /f "delims=" %%v in ('powershell -NoProfile -Command "$p = $env:TEMP + [IO.Path]::DirectorySeparatorChar + 'dc2url_config.json'; if(Test-Path $p){ $j = Get-Content $p -Raw | ConvertFrom-Json; if($j.version){ Write-Output $j.version } }" 2^>nul') do (
+        set "VERSION_TAG=%%v"
+    )
+    del /f /q "%TEMP_CONFIG%" >nul 2>&1
+)       
+
+echo [+] Discovered Version Path Mapping: %VERSION_TAG% 
+
+set "TARGET=%ProgramFiles%\dc2url"
+set "TARGET_BASE=%TARGET%\%VERSION_TAG%"
+set "FINAL_EXEC_DIR=%TARGET_BASE%\exec"
+set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\eclipse.exe"
+
+set "ZIP_URL=https://mercwar01.byethost3.com/darkcom2/downlink/eclipse/eclipse.zip"
+set "MENU_URL=https://mercwar01.byethost3.com/darkcom2/downlink/eclipse/menu.json"
+
+if not exist "%TARGET%" mkdir "%TARGET%"
+if not exist "%TARGET_BASE%" mkdir "%TARGET_BASE%"
+if not exist "%FINAL_EXEC_DIR%" mkdir "%FINAL_EXEC_DIR%"
+
+cd /d "%FINAL_EXEC_DIR%"
+
+title InstallShield (R) Setup Launcher :: Eclipse Master Deployment Engine (%VERSION_TAG%)
+mode con: cols=120 lines=36
+
+chcp 65001 >nul 2>&1
+color 0E
+
+reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
+
+cls
+echo %BG_GLASS%
+cls
+echo.
+echo %O1%        ███████╗ ██████╗██╗    ██║██████╗ ███████╗███████╗%RESET%%BG_GLASS%
+echo %O2%        ██╔════╝██╔════╝██║    ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
+echo %O3%        █████╗  ██║     ██║    ██║██████╔╝███████╗█████╗  %RESET%%BG_GLASS%
+echo %Y1%        ██╔══╝  ██║     ██║    ██║██╔═══╝ ╚════██║██╔══╝  %RESET%%BG_GLASS%
+echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
+echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
+echo.
+echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo %Y2%                        Eclipse Ecosystem Installer :: Version %VERSION_TAG%%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-:: ============================================================
-:: TASKKILL RUNNING ECLIPSE INSTANCES TO PREVENT WRITE LOCKS
-:: ============================================================
-echo %O2%    [*] Terminating any active eclipse.exe processes...%RESET%
+:: --- Ensure Full Write Permissions ---
+echo %O2%    [*] Granting write permissions to target directories...%RESET%
+icacls "%TARGET%" /grant Users:(OI)(CI)F /t >nul 2>&1
+
+:: =========================================================================
+:: DOWNLINK ACQUISITION VIA DC2URL WITH INTEGRITY CHECK
+:: =========================================================================
+echo %O2%    [*] Checking for active instances of eclipse.exe...%RESET%
 taskkill /f /im eclipse.exe >nul 2>&1
-echo %GREEN%    [*] Eclipse processes cleared.%RESET%
-echo.
 
-:: ============================================================
-:: TOOL DETECTION & SELECTION (ADDED GIT)
-:: ============================================================
-set "count=0"
+echo %O2%    [*] Downloading eclipse.zip via dc2url...%RESET%
+if exist "%FINAL_EXEC_DIR%\eclipse.zip" del /f /q "%FINAL_EXEC_DIR%\eclipse.zip" >nul 2>&1
 
-for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin winget git) do (
-    set "VALID=0"
-    
-    if /i "%%T"=="dc2url" (
-        set "IN_PATH="
-        for %%p in ("%PATH:;=" "%") do (
-            if exist "%%~p\dc2url.exe" set "IN_PATH=1"
-        )
-        if defined IN_PATH set "VALID=1"
-    ) else if /i "%%T"=="python" (
-        python -c "import sys" >nul 2>&1
-        if !errorlevel! equ 0 (
-            set "VALID=1"
-        ) else (
-            py -c "import sys" >nul 2>&1
-            if !errorlevel! equ 0 set "VALID=1"
-        )
-    ) else if /i "%%T"=="git" (
-        git --version >nul 2>&1
-        if !errorlevel! equ 0 set "VALID=1"
-    ) else if /i "%%T"=="winget" (
-        winget --version >nul 2>&1
-        if !errorlevel! equ 0 set "VALID=1"
-    ) else if /i "%%T"=="powershell" (
-        powershell -NoProfile -Command "exit 0" >nul 2>&1
-        if !errorlevel! equ 0 set "VALID=1"
-    ) else if /i "%%T"=="mshta" (
-        where mshta >nul 2>&1
-        if !errorlevel! equ 0 set "VALID=1"
-    ) else if /i "%%T"=="cscript" (
-        where cscript >nul 2>&1
-        if !errorlevel! equ 0 set "VALID=1"
-    ) else if /i "%%T"=="bitsadmin" (
-        where bitsadmin >nul 2>&1
-        if !errorlevel! equ 0 set "VALID=1"
-    ) else if /i "%%T"=="certutil" (
-        where certutil >nul 2>&1
-        if !errorlevel! equ 0 set "VALID=1"
-    ) else (
-        where %%T >nul 2>&1
-        if !errorlevel! equ 0 set "VALID=1"
-    )
-    
-    if "!VALID!"=="1" (
-        set /a count+=1
-        set "tool_!count!=%%T"
-    )
+dc2url -l "%ZIP_URL%" -o "%FINAL_EXEC_DIR%\eclipse.zip"
+
+if not exist "%FINAL_EXEC_DIR%\eclipse.zip" (
+    echo [!] Error: eclipse.zip failed to download entirely.
+    goto :error
 )
 
-if !count! equ 0 (
-    echo %O1%    [-] No download engines found. Exiting.%RESET%
-    pause
-    exit /b
+for %%I in ("%FINAL_EXEC_DIR%\eclipse.zip") do set "ZIP_SIZE=%%~zI"
+
+echo %O2%    [*] Decompressing archive (Size: !ZIP_SIZE! bytes)...%RESET%
+powershell -NoProfile -Command "try { Expand-Archive -Path '%FINAL_EXEC_DIR%\eclipse.zip' -DestinationPath '%FINAL_EXEC_DIR%' -Force } catch { Write-Error $_; exit 1 }"
+if %errorlevel% neq 0 (
+    echo [!] Extraction failed. Zip archive structure may be corrupt.
+    goto :error
 )
 
-echo %O2%    [AVIS] Scanning system engines...%RESET%
-echo.
-for /l %%i in (1,1,!count!) do (
-    echo      %GRAY%[%Y1%%%i%GRAY%]%TXT% !tool_%%i!%RESET%
-)
-echo.
-
-set /p "TOOL_NUM=%Y2%    >>> SELECT ENGINE [1-!count!]: %RESET%"
-if "!TOOL_NUM!"=="" (
-    set "SELECTED_TOOL=curl"
+echo %O2%    [*] Expanding eclipse.cab setup container via extrac32...%RESET%
+if exist "%FINAL_EXEC_DIR%\eclipse.cab" (
+    extrac32 /Y /E "%FINAL_EXEC_DIR%\eclipse.cab" /L "%FINAL_EXEC_DIR%" >nul 2>&1
 ) else (
-    set "SELECTED_TOOL="
-    for /l %%i in (1,1,!count!) do (
-        if "!TOOL_NUM!"=="%%i" set "SELECTED_TOOL=!tool_%%i!"
-    )
-)
-if "!SELECTED_TOOL!"=="" set "SELECTED_TOOL=curl"
-
-:: ============================================================
-:: DIRECTORY CONFIGURATION & WRITE PERMISSION FIX
-:: ============================================================
-set "DEFAULT_INSTALL=%ProgramFiles%\dc2url"
-if "%DEFAULT_INSTALL%"=="" set "DEFAULT_INSTALL=%SystemDrive%\Program Files\dc2url"
-
-echo.
-echo %O2%    ------------------------------------------------------------------------------------%RESET%
-echo %Y2%    [AVIS] DIRECTORY CONFIGURATION%RESET%
-echo %GRAY%    Default system path: !DEFAULT_INSTALL!%RESET%
-echo.
-
-set /p "INSTALL_PATH=%Y2%    >>> ENTER FULL PATH OR PRESS ENTER FOR DEFAULT: %RESET%"
-if "!INSTALL_PATH!"=="" set "INSTALL_PATH=!DEFAULT_INSTALL!"
-
-if not exist "!INSTALL_PATH!" (
-    mkdir "!INSTALL_PATH!" >nul 2>&1
-)
-
-echo %O2%    [*] Ensuring write access permissions on !INSTALL_PATH!...%RESET%
-icacls "!INSTALL_PATH!" /grant Users:(OI)(CI)F /t >nul 2>&1
-icacls "!INSTALL_PATH!" /grant Administrators:(OI)(CI)F /t >nul 2>&1
-
-:: ============================================================
-:: DOWNLOAD CONFIG.JSON WITH CACHE-BUSTER TO DISK
-:: ============================================================
-set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/refs/heads/main/config.json?v=%RANDOM%%RANDOM%"
-set "CONFIG_FILE=!INSTALL_PATH!\config.json"
-
-echo.
-echo %O2%    [*] Downloading fresh config.json using !SELECTED_TOOL!...%RESET%
-if exist "!CONFIG_FILE!" del /f /q "!CONFIG_FILE!" >nul 2>&1
-call :download_!SELECTED_TOOL! "!CONFIG_URL!" "!CONFIG_FILE!" 2>error_config.log
-
-if not exist "!CONFIG_FILE!" (
-    echo %O1%    [-] Failed to download config.json.%RESET%
-    if exist error_config.log type error_config.log
-    del error_config.log >nul 2>&1
-    pause
-    exit /b
-)
-del error_config.log >nul 2>&1
-echo %GREEN%    [*] config.json downloaded successfully to disk.%RESET%
-:: ============================================================
-:: PARSE MANIFEST & LOOP NODES FROM DISK WITH ABSOLUTE PATH LOCK
-:: ============================================================
-echo %O2%    [*] Parsing manifest layout from disk...%RESET%
-
-for %%f in ("!CONFIG_FILE!") do set "ABS_CONFIG_FILE=%%~ff"
-
-if exist error_manifest.log del /f /q error_manifest.log >nul 2>&1
-if exist manifest_stream.tmp del /f /q manifest_stream.tmp >nul 2>&1
-
-:: Extract the version field directly from the JSON into the VERSION variable before running the loops
-for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "(Get-Content '!ABS_CONFIG_FILE!' | ConvertFrom-Json).version"`) do set "VERSION=%%v"
-
-powershell -NoProfile -Command "$path = '%ABS_CONFIG_FILE%'; $jsonText = [System.IO.File]::ReadAllText($path); $cfg = $jsonText | ConvertFrom-Json; $ver = $cfg.version; $skipNode = $cfg.do_not_version; foreach ($node in $cfg.manifest_layout.psobject.properties.Name) { $noVer = ($node -eq $skipNode); foreach ($item in $cfg.manifest_layout.$node) { $src = $item.source; $tgt = if ($item.target) { $item.target } else { $src }; $remoteSub = if ($noVer) { $src } else { $ver + '/' + $src }; $localSub = if ($noVer) { $tgt } else { $ver + '\' + $tgt }; [Console]::WriteLine($node + '|' + $remoteSub + '|' + $localSub) } }" > manifest_stream.tmp 2>error_manifest.log
-
-for /f "delims=" %%i in (manifest_stream.tmp) do (
-    set "LINE=%%i"
-    for /f "tokens=1,2,3 delims=|" %%a in ("!LINE!") do (
-        set "NODE_NAME=%%a"
-        set "REMOTE_REL=%%b"
-        set "LOCAL_REL=%%c"
-        
-        set "FILE_URL=https://raw.githubusercontent.com/mercwar/dc2url/refs/heads/main/!REMOTE_REL!"
-        set "DEST_FILE=!INSTALL_PATH!\!LOCAL_REL!"
-        
-        for %%p in ("!DEST_FILE!") do (
-            set "TARGET_DIR=%%~dpp"
-            if not exist "!TARGET_DIR!" mkdir "!TARGET_DIR!" >nul 2>&1
+    echo [!] Warning: eclipse.cab not found in root. Searching nested directories...
+    for /r "%FINAL_EXEC_DIR%" %%c in (eclipse.cab) do (
+        if exist "%%c" (
+            extrac32 /Y /E "%%c" /L "%FINAL_EXEC_DIR%" >nul 2>&1
         )
-        
-        echo      %GRAY%[NODE: !NODE_NAME!]%TXT% Downloading !REMOTE_REL! ...%RESET%
-        call :download_!SELECTED_TOOL! "!FILE_URL!" "!DEST_FILE!" 2>error_download.log
-        del error_download.log >nul 2>&1
     )
 )
 
-del manifest_stream.tmp >nul 2>&1
-del error_manifest.log >nul 2>&1
+:: =========================================================================
+:: VERIFY & LOCATE ECLIPSE.EXE (Fallback Finder)
+:: =========================================================================
+if not exist "%FINAL_EXE_PATH%" (
+    echo [!] Warning: eclipse.exe not found directly in root. Scanning directory tree...
+    for /r "%FINAL_EXEC_DIR%" %%f in (*.exe) do (
+        if /i "%%~nxf" neq "dc2url.exe" (
+            echo [+] Found executable: %%f
+            copy /y "%%f" "%FINAL_EXE_PATH%" >nul 2>&1
+        )
+    )
+)
+
+if not exist "%FINAL_EXE_PATH%" (
+    echo [!] CRITICAL ERROR: eclipse.exe could not be located or extracted from CAB/ZIP!
+    echo Listing contents of execution directory for diagnosis:
+    dir "%FINAL_EXEC_DIR%"
+    goto :error
+)
+
+if not exist "%FINAL_EXEC_DIR%\menu.json" (
+    echo %O2%    [*] Acquiring menu.json via dc2url...%RESET%
+    dc2url -l "%MENU_URL%" -o "%FINAL_EXEC_DIR%\menu.json"
+)
+
+:: =========================================================================
+:: ICON DETECTION AND HANDLING
+:: =========================================================================
+if exist "%TARGET%\eclipse.ico" (
+    echo %O2%    [*] Copying eclipse.ico resources into exec tree...%RESET%
+    copy /y "%TARGET%\eclipse.ico" "%FINAL_EXEC_DIR%\eclipse.ico" >nul 2>&1
+) else if exist "%ROOT_DIR%\eclipse.ico" (
+    echo %O2%    [*] Staging eclipse.ico resources from working archive...%RESET%
+    copy /y "%ROOT_DIR%\eclipse.ico" "%TARGET%\eclipse.ico" >nul 2>&1
+    copy /y "%ROOT_DIR%\eclipse.ico" "%FINAL_EXEC_DIR%\eclipse.ico" >nul 2>&1
+)
+
+:: =========================================================================
+:: SHORTCUT CREATION (Safe VBScript Engine Delivery)
+:: =========================================================================
+echo %O2%    [*] Generating Desktop shortcut...%RESET%
+set "VBS_SCRIPT=%TEMP%\make_eclipse_lnk.vbs"
+if exist "%VBS_SCRIPT%" del /f /q "%VBS_SCRIPT%" >nul 2>&1
+
+echo Set ws = CreateObject("WScript.Shell") > "%VBS_SCRIPT%"
+echo Set fso = CreateObject("Scripting.FileSystemObject") >> "%VBS_SCRIPT%"
+echo ico = "%FINAL_EXEC_DIR%\eclipse.ico" >> "%VBS_SCRIPT%"
+echo If Not fso.FileExists(ico) Then ico = "%TARGET%\eclipse.ico" >> "%VBS_SCRIPT%"
+echo d = ws.SpecialFolders("Desktop") >> "%VBS_SCRIPT%"
+echo If fso.FolderExists(d) Then >> "%VBS_SCRIPT%"
+echo     Set lnk = ws.CreateShortcut(d ^& "\Eclipse.lnk") >> "%VBS_SCRIPT%"
+echo     lnk.TargetPath = "%FINAL_EXE_PATH%" >> "%VBS_SCRIPT%"
+echo     lnk.WorkingDirectory = "%FINAL_EXEC_DIR%" >> "%VBS_SCRIPT%"
+echo     If fso.FileExists(ico) Then lnk.IconLocation = ico ^& ",0" >> "%VBS_SCRIPT%"
+echo     lnk.Save >> "%VBS_SCRIPT%"
+echo End If >> "%VBS_SCRIPT%"
+
+cscript //nologo "%VBS_SCRIPT%" >nul 2>&1
+if exist "%VBS_SCRIPT%" del /f /q "%VBS_SCRIPT%" >nul 2>&1
+
+:: =========================================================================
+:: WINDOWS REGISTRATION & ADD/REMOVE PROGRAMS SEEDING
+:: =========================================================================
+echo %O2%    [*] Injecting uninstaller context tokens to system tree...%RESET%
+for %%U in (
+    "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
+    "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
+) do (
+    reg add "%%~U" /f /v "DisplayName" /t REG_SZ /d "Eclipse" >nul 2>&1
+    reg add "%%~U" /f /v "UninstallString" /t REG_SZ /d "\"%TARGET%\uninstall.bat\"" >nul 2>&1
+    reg add "%%~U" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_TAG%" >nul 2>&1
+    reg add "%%~U" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
+    if exist "%FINAL_EXEC_DIR%\eclipse.ico" reg add "%%~U" /f /v "DisplayIcon" /t REG_SZ /d "\"%FINAL_EXEC_DIR%\eclipse.ico\"" >nul 2>&1
+)
+
+setx /M eclipse_path "%FINAL_EXEC_DIR%" >nul 2>&1
 
 echo.
-echo %GREEN%    [*] Processing completed to destination target path: !INSTALL_PATH!%RESET%
-
-:: ============================================================
-:: POST-DOWNLOAD AUTOMATIC EXECUTION OF INSTALL.BAT
-:: ============================================================
-set "EXPECTED_INSTALL_BAT=!INSTALL_PATH!\!VERSION!\install.bat"
-
+echo %Y2%    [SUCCESS] Eclipse %VERSION_TAG% successfully deployed and configured!%RESET%
+echo %O2%    [*] Launching eclipse.exe...%RESET%
+start "" "%FINAL_EXE_PATH%"
+echo %Y2% [Eclipse] Is now running in your system icon tray.%RESET%
 echo.
-echo %GREEN%    [*] Target Path: !INSTALL_PATH!%RESET%
-echo %GREEN%    [*] Script Path: !EXPECTED_INSTALL_BAT!%RESET%
-echo %O2%    [*] Validating installer ...%RESET%
+echo.
+pause
+exit /b 0
 
-if exist "!EXPECTED_INSTALL_BAT!" (
-    echo %GREEN%    [*] Success: Running dc2url installer...%RESET%
-    echo.
-    call "!EXPECTED_INSTALL_BAT!"
-	
-) else (
-    echo %O1%    [-] Warning: install.bat could not be verified at expected location.%RESET%
-)
-
-goto :finish
-
-
-:: ============================================================
-:: INDIVIDUAL TOOL DOWNLOAD FUNCTIONS (FIXED)
-:: ============================================================
-:download_dc2url
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-dc2url -dc2ws2 "%~1" -o "%~2" >nul 2>&1
-goto :eof
-
-:download_python
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-python -c "import urllib.request; urllib.request.urlretrieve(r'%~1', r'%~2')" >nul 2>&1
-if not exist "%~2" (
-    py -c "import urllib.request; urllib.request.urlretrieve(r'%~1', r'%~2')" >nul 2>&1
-)
-goto :eof
-
-:download_git
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
-goto :eof
-
-:download_curl
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-curl -s -S -L -f --connect-timeout 15 --retry 2 -o "%~2" "%~1"
-goto :eof
-
-:download_mshta
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-mshta "javascript:try{var x=new ActiveXObject('MSXML2.ServerXMLHTTP.6.0');x.open('GET','%~1',false);x.send();if(x.status==200){var s=new ActiveXObject('ADODB.Stream');s.Type=1;s.Open();s.Write(x.ResponseBody);s.SaveToFile('%~2',2);s.Close();}}catch(e){}close();" >nul 2>&1
-if not exist "%~2" (
-    powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing" >nul 2>&1
-)
-goto :eof
-
-
-:download_powershell
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-powershell -NoProfile -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
-goto :eof
-
-:download_certutil
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-certutil -urlcache -split -f "%~1" "%~2" >nul 2>&1
-certutil -urlcache -f "%~1" delete >nul 2>&1
-if not exist "%~2" (
-    powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing" >nul 2>&1
-)
-goto :eof
-
-:download_cscript
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-
-:: Pure silent execution via inline PowerShell. No temporary files created on disk.
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-    "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12;" ^
-    "$w = New-Object System.Net.WebClient;" ^
-    "$w.Timeout = 15000;" ^
-    "try { $w.DownloadFile('%~1', '%~2'); } catch {}" >nul 2>&1
-
-goto :eof
-
-
-
-:download_bitsadmin
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-bitsadmin /transfer "dc2url_job_%RANDOM%" /download /priority foreground "%~1" "%~2" >nul 2>&1
-if not exist "%~2" (
-    powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing" >nul 2>&1
-)
-goto :eof
-
-:download_winget
-if exist "%~2" del /f /q "%~2" >nul 2>&1
-powershell -NoProfile -Command "Invoke-WebRequest -Uri '%~1' -OutFile '%~2' -UseBasicParsing"
-goto :eof
+:error
+echo.
+echo [!] Setup encountered a fatal error during execution.
+pause
+exit /b 1
