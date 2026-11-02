@@ -93,36 +93,166 @@ A fully deployed Dark-Com-2 runtime environment consists of the following compon
 darkcom2.exe <url> [options] 
 
 ```
+Here is how you can update your documentation to properly explain and teach users how to interpret the command-line reference manual when running `dc2url`:
 
-### Supported Flags
+---
 
-* `-X, --request <method>` — Specifies the HTTP request method (`GET`, `POST`, `PUT`, `DELETE`). Supplying data automatically promotes `GET` requests to `POST`.
-* `-d, --data <data>` — Supplies a payload string or raw JSON body for transmission.
-* `-H, --header <header>` — Passes custom HTTP headers (e.g., `-H "Content-Type: application/json"`).
-* `-v, --verbose` — Enables detailed wire tracing, outputting simulated cURL request frames (`>`) and response headers (`<`).
+## 📖 Understanding the CLI Reference Manual
+
+When you run `dc2url` directly from your command prompt without arguments (or with `-h` / `--help`), it outputs the built-in reference banner. Here is a breakdown of how to read and use each section of that reference:
+
+### 1. Primary Core Options
+
+These are the essential flags you will use for 90% of your daily HTTP requests and API testing:
+
+* **`-X, --request <method>`**: Explicitly defines the HTTP verb (`GET`, `POST`, `PUT`, `DELETE`). Note that if you attach a data payload with `-d`, `dc2url` automatically promotes `GET` requests to `POST`.
+* **`-d, --data <data>`**: Sends a raw string or JSON payload body along with your request.
+* **`-o, --output <file>`**: Bypasses printing the response to the terminal and streams raw incoming data straight to a file on disk. This is what the automated installation scripts use to pull configuration files and archives safely.
+* **`-h, --help`**: Triggers the reference manual screen on demand.
+
+### 2. Secondary Protocol Options & Advanced Switches
+
+These flags give you granular control over headers, user agents, and internal network engines:
+
+* **`-H, --header <header>`**: Injects custom HTTP headers into your request (e.g., `-H "Authorization: Bearer <token>"`).
+* **`-A, --user-agent <agent>`**: Spoofs or overrides the default client identification string sent to the server.
+* **`-s, --silent`**: Suppresses all non-error output streams for clean script automation.
+* **`-v, --verbose`**: Turns on detailed diagnostic tracing, mirroring standard cURL output formatting (`>` for outbound request headers/payloads, `<` for incoming response headers).
+* **`-l, --local`**: Forces the application to load `DarkComHeadless.dll` locally directly from the executable's folder.
+* **`--nojs, -nojs`**: Bypasses the full WebView2 JS engine entirely, switching into a high-speed WinINet binary stub mode.
+* **`--nowv2, -nowv2`**: Bypasses the WebView2 environment completely and forces a dynamic fallback to the `dc2ws2` network engine.
+* **`--dc2ws2, -dc2ws2`**: Explicitly routes your request through the high-performance `dc2ws2` network engine DLL.
+* **`--noscript, -noscript`**: Activates direct raw download mode via `dc2ws2`, completely bypassing JavaScript rendering and WebView2 overhead for maximum download speeds.
 
 ### Examples
+Here is the expanded **Command-Reference & Usage Examples** section to integrate into the `README.md`. It breaks down every flag, teaches how to read the CLI syntax, and demonstrates real-world execution modes (standard, flags-first, long-flags, network engine switches, and file output handling):
 
-**Standard cURL Style (URL First):**
+---
+
+## 💻 Command-Reference & Usage Examples
+
+`dc2url` supports flexible argument ordering just like standard cURL, allowing you to place URLs first, lead with operational flags, or use long-form parameters interchangeably.
 
 ```cmd
-darkcom2.exe http://localhost:8080/echo.php -X POST -d "{\"action\":\"test_url_first\"}" -v
+dc2url [options] <url>
 
 ```
 
-**Alternative Flag-First Style:**
+### 1. Standard cURL Style (URL First)
+
+Placing the target URL immediately after the executable is the traditional cURL convention.
 
 ```cmd
-darkcom2.exe -X POST -d "{\"action\":\"test_flags_first\"}" http://localhost:8080/echo.php --verbose
+dc2url http://localhost:8080/echo.php -X POST -d "{\"action\":\"test_url_first\"}" -v
 
 ```
 
-**Long Flags Style:**
+* **How to read this command:**
+* `http://localhost:8080/echo.php` — The target endpoint receiving the request.
+* `-X POST` — Specifies the HTTP verb to use (`GET`, `POST`, `PUT`, `DELETE`).
+* `-d "{\"action\":\"test_url_first\"}"` — Attaches a raw JSON payload body. Inner double quotes are escaped (`\"`) for standard Windows CMD execution. *(Note: Passing a data payload via `-d` automatically promotes `GET` requests to `POST` even if `-X` is omitted).*
+* `-v` — Enables **verbose mode**, outputting detailed diagnostic traces (`>` for outbound request frames, `<` for incoming response headers) to `stderr`.
+
+
+
+---
+
+### 2. Alternative Flag-First Style
+
+You can place your operational flags and data payloads before specifying the destination URL. This is useful when scripting automated pipelines where options are dynamically appended.
 
 ```cmd
-darkcom2.exe --request POST --data "{\"action\":\"test_long_flags\"}" http://localhost:8080/echo.php -v
+dc2url -X POST -d "{\"action\":\"test_flags_first\"}" http://localhost:8080/echo.php --verbose
 
 ```
+
+* **How to read this command:**
+* `-X POST -d ...` — Declares the HTTP method and payload upfront before the parser encounters the target URL.
+* `http://localhost:8080/echo.php` — Evaluated as the destination endpoint.
+* `--verbose` — Uses the long-flag variant of `-v` to enable live wire tracing.
+
+
+
+---
+
+### 3. Long Flags Style
+
+For readability in shell scripts, batch routines, or maintenance documentation, you can substitute shorthand flags with descriptive long-form options.
+
+```cmd
+dc2url --request POST --data "{\"action\":\"test_long_flags\"}" http://localhost:8080/echo.php -v
+
+```
+
+* **How to read this command:**
+* `--request POST` — Long-form equivalent of `-X POST`.
+* `--data "..."` — Long-form equivalent of `-d "..."`.
+* `http://localhost:8080/echo.php -v` — Destination endpoint combined with diagnostic logging.
+
+
+
+---
+
+### 4. Direct File Download Output (`-o, --output`)
+
+When fetching files, installers, or remote manifests, stream incoming bytes directly to disk instead of printing them to the terminal console:
+
+```cmd
+dc2url -l -s "https://raw.githubusercontent.com/mercwar/dc2url/main/config.json" -o "C:\TEMP\config.json"
+
+```
+
+* **How to read this command:**
+* `-l` — Forces local DLL resolution (`DarkComHeadless.dll` / dependencies in execution directory).
+* `-s` — **Silent mode**, suppressing all non-error console output streams.
+* `-o "C:\TEMP\config.json"` — Directs the raw response body stream into the specified disk file.
+
+
+
+---
+
+### 5. Advanced Engine & Protocol Execution Modes
+
+`dc2url` includes high-performance network fallback switches to control how requests pass through system runtime engines:
+
+* **Bypassing JavaScript Engine for High-Speed Binary Downloads (`--nojs`):**
+```cmd
+dc2url --nojs -s "http://mercwar01.byethost3.com/darkcom2/downlink/eclipse/eclipse.zip" -o "eclipse.zip"
+
+```
+
+
+* *Usage:* Switches into WinINet fast binary stub mode, eliminating Chromium/WebView2 JavaScript rendering overhead for pure file downloads.
+
+
+* **Routing via high-performance `dc2ws2` DLL (`--dc2ws2`):**
+```cmd
+dc2url --dc2ws2 -s "http://mercwar01.byethost3.com/darkcom2/downlink/eclipse/menu.json" -o "menu.json"
+
+```
+
+
+* *Usage:* Bypasses standard browser contexts and routes HTTP data acquisition through the dedicated high-performance `dc2ws2` network engine DLL.
+
+
+* **Direct Raw Download Mode (`--noscript`):**
+```cmd
+dc2url --noscript -v "http://localhost:8080/large_payload.bin" -o "large_payload.bin"
+
+```
+
+
+* *Usage:* Disables all client-side script execution and processes network frames directly via the native network DLL layer.
+
+
+* **Injecting Custom HTTP Headers (`-H`):**
+```cmd
+dc2url http://localhost:8080/api/status -H "Authorization: Bearer token_abc123" -H "X-Client: DarkCom2" -v
+
+```
+
+
+* *Usage:* Passes sequential custom request headers (`-H`) into the outbound HTTP header frame.
 
 ---
 
