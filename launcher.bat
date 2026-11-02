@@ -240,7 +240,7 @@ goto :finish
 :: ============================================================
 :download_dc2url
 if exist "%~2" del /f /q "%~2" >nul 2>&1
-dc2url -s -dc2ws2 "%~1" -o "%~2" >nul 2>&1
+dc2url -dc2ws2 "%~1" -o "%~2" >nul 2>&1
 goto :eof
 
 :download_python
