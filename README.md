@@ -9,7 +9,7 @@
 </div>
 
 
-# ✨ dc2url powered by ⚡ Dark-Com-2  
+# ✨ dc2url Powered by ⚡ Dark-Com-2  
 
 
 ![dc24](images/dc2url.png)
