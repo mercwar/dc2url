@@ -22,8 +22,6 @@
 
 #### 🗝️ dc2url Core Cyborg Ecosystem Installer
 
----
-
 ## 🚀 Module Feature Spotlight: dc2ws2 (Included FREE!)
 
 ### What is dc2ws2?
