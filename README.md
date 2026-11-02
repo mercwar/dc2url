@@ -14,46 +14,49 @@
 
 ![dc24](images/dc2url.png)
 
+#
 
 ##  🌈 dc2ws2 Performance  
 
 ![dc24](images/dc2ws2.jpg)
 
-#### 🗝️ dc2url Core Cyborg Ecosystem Installer[cite: 1]
+
+#### 🗝️ dc2url Core Cyborg Ecosystem Installer
 
 ---
 
-## 🚀 Module Feature Spotlight: dc2ws2 (Included FREE!)[cite: 1]
+## 🚀 Module Feature Spotlight: dc2ws2 (Included FREE!)
 
-### What is dc2ws2?[cite: 1]
-**dc2ws2** is the lightweight, ultra-high-performance WebSocket/WinSock bridging subsystem now bundled **FREE** with every installation of `dc2url v1.1+`[cite: 1]. Designed specifically to work seamlessly alongside native Windows networking routines, `dc2ws2` acts as a dual-channel telemetry and binary payload relay for real-time communication within the Cyborg Ecosystem[cite: 1].
+### What is dc2ws2?
+**dc2ws2** is the lightweight, ultra-high-performance WebSocket/WinSock bridging subsystem now bundled **FREE** with every installation of `dc2url v1.1+`. Designed specifically to work seamlessly alongside native Windows networking routines, `dc2ws2` acts as a dual-channel telemetry and binary payload relay for real-time communication within the Cyborg Ecosystem.
 
-### Key Features & Technical Highlights[cite: 1]
-* **Zero External Dependencies:** Built natively on WinSock2 and WinHTTP protocols[cite: 1].
-* **Low Latency Binary Streaming:** Asynchronous frame processing for low-overhead telemetry transport[cite: 1].
-* **Auto-Reconnecting Uplink Engine:** Automatic failover and circuit reset routines to ensure zero packet drop during transient network shifts[cite: 1].
-* **Dynamic Code-Page Protection:** Integrated UTF-8 session encoding to prevent console glyph scrambling and keep terminal output crisp[cite: 1].
-* **Seamless Shell Launcher Integration:** Instantly callable from `viel`, standard PowerShell, or standalone batch scripts[cite: 1].
-
----
-
-## 📜 Revision History & Release Notes[cite: 1]
-
-### v1.1 (Current Release) - *"dc2ws2 Integration & Uplink Matrix Update"*[cite: 1]
-* 🆕 **NEW:** Added `dc2ws2` WebSocket Bridge natively into the installation payload at no extra cost[cite: 1].
-* ⚡ **ENHANCED:** Implemented dynamic Unicode block character rendering (`[char]0x2588`, `[char]0x2554`, etc.) in all launcher headers (`Write-Header`) to completely eliminate code page translation bugs on legacy systems[cite: 1].
-* ⚡ **ENHANCED:** Refactored `uninstall.bat` with sanitized ASCII indentation and ANSI VT100 fallback formatting for maximum shell compatibility[cite: 1].
-* 🛠️ **FIXED:** Resolved `cmd.exe` unexpected token errors during administrative privilege elevation (`RunAs` context)[cite: 1].
-* 🛠️ **FIXED:** Streamlined environment variable path cleanup in system/user environment matrices upon uninstallation[cite: 1].
+### Key Features & Technical Highlights
+* **Zero External Dependencies:** Built natively on WinSock2 and WinHTTP protocols.
+* **Low Latency Binary Streaming:** Asynchronous frame processing for low-overhead telemetry transport.
+* **Auto-Reconnecting Uplink Engine:** Automatic failover and circuit reset routines to ensure zero packet drop during transient network shifts.
+* **Dynamic Code-Page Protection:** Integrated UTF-8 session encoding to prevent console glyph scrambling and keep terminal output crisp.
+* **Seamless Shell Launcher Integration:** Instantly callable from `viel`, standard PowerShell, or standalone batch scripts.
 
 ---
 
-### v1.0 (Initial Release) - *"Core Foundation"*[cite: 1]
-* Initial public release of dc2url Master Deployment Engine[cite: 1].
-* Native WinSock & WinHTTP TLS routing matrix implementation[cite: 1].
-* Basic setup, environment pathing, and standard uninstaller routines[cite: 1].
-* Introductory CLI interface and test suite initialization[cite: 1].
+## 📜 Revision History & Release Notes
+
+### v1.1 (Current Release) - *"dc2ws2 Integration & Uplink Matrix Update"*
+* 🆕 **NEW:** Added `dc2ws2` WebSocket Bridge natively into the installation payload at no extra cost.
+* ⚡ **ENHANCED:** Implemented dynamic Unicode block character rendering (`[char]0x2588`, `[char]0x2554`, etc.) in all launcher headers (`Write-Header`) to completely eliminate code page translation bugs on legacy systems.
+* ⚡ **ENHANCED:** Refactored `uninstall.bat` with sanitized ASCII indentation and ANSI VT100 fallback formatting for maximum shell compatibility.
+* 🛠️ **FIXED:** Resolved `cmd.exe` unexpected token errors during administrative privilege elevation (`RunAs` context).
+* 🛠️ **FIXED:** Streamlined environment variable path cleanup in system/user environment matrices upon uninstallation.
+
+---
+
+### v1.0 (Initial Release) - *"Core Foundation"*
+* Initial public release of dc2url Master Deployment Engine.
+* Native WinSock & WinHTTP TLS routing matrix implementation.
+* Basic setup, environment pathing, and standard uninstaller routines.
+* Introductory CLI interface and test suite initialization.
 ###  💥 cURL-Compatible Headless Browser Engine
+
 
 💫 Instant powershell installer:  
 
