@@ -111,7 +111,6 @@ if not exist "%FINAL_EXEC_DIR%\eclipse.zip" (
 for %%I in ("%FINAL_EXEC_DIR%\eclipse.zip") do set "ZIP_SIZE=%%~zI"
 
 echo %O2%    [*] Decompressing archive (Size: !ZIP_SIZE! bytes)...%RESET%
-:: FIXED: Switched to native Expand-Archive cmdlet to avoid .NET method signature/encoding cast errors
 powershell -NoProfile -Command "try { Expand-Archive -Path '%FINAL_EXEC_DIR%\eclipse.zip' -DestinationPath '%FINAL_EXEC_DIR%' -Force } catch { Write-Error $_; exit 1 }"
 if %errorlevel% neq 0 (
     echo [!] Extraction failed. Zip archive structure may be corrupt.
@@ -168,20 +167,31 @@ if exist "%TARGET%\eclipse.ico" (
 )
 
 :: =========================================================================
-:: SHORTCUT CREATION (Desktop & Start Menu / Program Files)
+:: SHORTCUT CREATION (Safe VBScript Engine Delivery)
 :: =========================================================================
 echo %O2%    [*] Generating Desktop and Program Files shortcuts...%RESET%
-powershell -NoProfile -Command ^
-    "$WshShell = New-Object -comObject WScript.Shell; " ^
-    "$ico = '%FINAL_EXEC_DIR%\eclipse.ico'; " ^
-    "if(!(Test-Path $ico)) { $ico = '%TARGET%\eclipse.ico' }; " ^
-    "foreach ($dest in @([Environment]::GetFolderPath('Desktop'), '%ProgramData%\Microsoft\Windows\Start Menu\Programs')) { " ^
-    "  $lnk = $WshShell.CreateShortcut(\"$dest\Eclipse.lnk\"); " ^
-    "  $lnk.TargetPath = '%FINAL_EXE_PATH%'; " ^
-    "  $lnk.WorkingDirectory = '%FINAL_EXEC_DIR%'; " ^
-    "  if(Test-Path $ico) { $lnk.IconLocation = \"$ico,0\" }; " ^
-    "  $lnk.Save(); " ^
-    "}"
+set "VBS_SCRIPT=%TEMP%\make_eclipse_lnk.vbs"
+if exist "%VBS_SCRIPT%" del /f /q "%VBS_SCRIPT%" >nul 2>&1
+
+:: Build the unescaped raw VBS engine builder block code safely on disk
+echo Set ws = CreateObject("WScript.Shell") > "%VBS_SCRIPT%"
+echo Set fso = CreateObject("Scripting.FileSystemObject") >> "%VBS_SCRIPT%"
+echo ico = "%FINAL_EXEC_DIR%\eclipse.ico" >> "%VBS_SCRIPT%"
+echo If Not fso.FileExists(ico) Then ico = "%TARGET%\eclipse.ico" >> "%VBS_SCRIPT%"
+echo paths = Array(ws.SpecialFolders("Desktop"), ws.ExpandEnvironmentStrings("%%ProgramData%%") ^& "\Microsoft\Windows\Start Menu\Programs") >> "%VBS_SCRIPT%"
+echo For Each d In paths >> "%VBS_SCRIPT%"
+echo     If fso.FolderExists(d) Then >> "%VBS_SCRIPT%"
+echo         Set lnk = ws.CreateShortcut(d ^& "\Eclipse.lnk") >> "%VBS_SCRIPT%"
+echo         lnk.TargetPath = "%FINAL_EXE_PATH%" >> "%VBS_SCRIPT%"
+echo         lnk.WorkingDirectory = "%FINAL_EXEC_DIR%" >> "%VBS_SCRIPT%"
+echo         If fso.FileExists(ico) Then lnk.IconLocation = ico ^& ",0" >> "%VBS_SCRIPT%"
+echo         lnk.Save >> "%VBS_SCRIPT%"
+echo     End If >> "%VBS_SCRIPT%"
+echo Next >> "%VBS_SCRIPT%"
+
+:: Fire off the temporary clean runtime script container safely
+cscript //nologo "%VBS_SCRIPT%" >nul 2>&1
+if exist "%VBS_SCRIPT%" del /f /q "%VBS_SCRIPT%" >nul 2>&1
 
 :: =========================================================================
 :: WINDOWS REGISTRATION & ADD/REMOVE PROGRAMS SEEDING
@@ -191,11 +201,11 @@ for %%U in (
     "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
     "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
 ) do (
-    reg add %%U /f /v "DisplayName" /t REG_SZ /d "Eclipse %VERSION_TAG%" >nul 2>&1
-    reg add %%U /f /v "UninstallString" /t REG_SZ /d "\"%TARGET%\uninstall.bat\"" >nul 2>&1
-    reg add %%U /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_TAG%" >nul 2>&1
-    reg add %%U /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
-    if exist "%FINAL_EXEC_DIR%\eclipse.ico" reg add %%U /f /v "DisplayIcon" /t REG_SZ /d "\"%FINAL_EXEC_DIR%\eclipse.ico\"" >nul 2>&1
+    reg add "%%~U" /f /v "DisplayName" /t REG_SZ /d "Eclipse %VERSION_TAG%" >nul 2>&1
+    reg add "%%~U" /f /v "UninstallString" /t REG_SZ /d "\"%TARGET%\uninstall.bat\"" >nul 2>&1
+    reg add "%%~U" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_TAG%" >nul 2>&1
+    reg add "%%~U" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
+    if exist "%FINAL_EXEC_DIR%\eclipse.ico" reg add "%%~U" /f /v "DisplayIcon" /t REG_SZ /d "\"%FINAL_EXEC_DIR%\eclipse.ico\"" >nul 2>&1
 )
 
 setx /M eclipse_path "%FINAL_EXEC_DIR%" >nul 2>&1
@@ -204,9 +214,8 @@ echo.
 echo %Y2%    [SUCCESS] Eclipse %VERSION_TAG% successfully deployed and configured!%RESET%
 echo %O2%    [*] Launching eclipse.exe...%RESET%
 start "" "%FINAL_EXE_PATH%"
-echo [Eclipse] Is now running in your system icon tray.
+echo %Y2% [Eclipse] Is now running in your system icon tray.%RESET%
 pause
-rem timeout /t 2 >nul
 exit /b 0
 
 :error
