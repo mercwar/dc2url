@@ -85,7 +85,7 @@ A fully deployed Dark-Com-2 runtime environment consists of the following compon
 
 ---
 
-![dc21](./images/cmd-src.png)
+![dc21](./images/ssndc.png)
 
 ## 💻 Command-Line Reference & Usage
 
@@ -129,7 +129,7 @@ darkcom2.exe --request POST --data "{\"action\":\"test_long_flags\"}" http://loc
 ## 🛠️ System Requirements & Deployment
 
 
-![dc22](./images/ssndc.png)
+![dc22](./images/ss-dc2i.png)
 
 * **Operating System:** Windows 10 or Windows 11 (64-bit x64 architecture).
 * **Runtime Dependency:** Microsoft Edge WebView2 Evergreen Runtime.
