@@ -118,9 +118,6 @@ if exist "%FINAL_EXEC_DIR%\menu.json" del /f /q "%FINAL_EXEC_DIR%\menu.json" >nu
 if exist "%FINAL_EXEC_DIR%\eclipse.ico" del /f /q "%FINAL_EXEC_DIR%\eclipse.ico" >nul 2>&1
 
 
-rmdir "%FINAL_EXEC_DIR%" >nul 2>&1
-rmdir "%TARGET_BASE%" >nul 2>&1
-rmdir "%TARGET%" >nul 2>&1
 
 echo.
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
