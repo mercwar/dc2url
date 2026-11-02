@@ -19,7 +19,7 @@
 
 ![dc24](images/dc2ws2.jpg)
 
-# dc2url Core Cyborg Ecosystem Installer[cite: 1]
+#### 🗝️ dc2url Core Cyborg Ecosystem Installer[cite: 1]
 
 ---
 
