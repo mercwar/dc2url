@@ -29,7 +29,7 @@ set "MIDI_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/sound/transf
 
 cd /d "%FINAL_EXEC_DIR%"
 
-title InstallShield (R) Setup Launcher v1.0 :: dc2url Master Deployment Engine
+title InstallShield (R) Setup Launcher v1.1 :: dc2url Master Deployment Engine
 
 mode con: cols=120 lines=34
 
@@ -46,32 +46,29 @@ set "O3=%E%[38;2;255;153;0m"
 set "Y1=%E%[38;2;255;200;0m"
 set "Y2=%E%[38;2;255;235;0m"
 set "TXT=%E%[38;2;240;240;240m"
+set "GRAY=%E%[38;2;115;125;145m"
+set "GREEN=%E%[38;2;90;255;120m"
 
 cls
 echo %BG_GLASS%
 cls
 
 echo.
-echo %O1%        ██████╗  █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%%BG_GLASS%
-echo %O2%        ██╔══██╗██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%%BG_GLASS%
-echo %O3%        ██║  ██║███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%%BG_GLASS%
-echo %Y1%        ██║  ██║██╔══██║██╔══██║██╔-██║ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%%BG_GLASS%
-echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%%BG_GLASS%
-echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%%BG_GLASS%
+
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%%BG_GLASS%
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-echo %O2%        [*] Granting full write access permissions to %VERSION_DIR%...%RESET%%BG_GLASS%
+echo %O2%        [*] Granting full write access permissions to %VERSION_DIR%...%RESET%
 icacls "%VERSION_DIR%" /grant Users:(OI)(CI)F /t >nul 2>&1
 
 if not exist "%FINAL_EXE_PATH%" (
-    echo %O1%        [AVIS FAILED] Execution binaries are missing in: %FINAL_EXEC_DIR%%RESET%%BG_GLASS%
+    echo %O1%        [AVIS FAILED] Execution binaries are missing in: %FINAL_EXEC_DIR%%RESET%
     goto :finish
 )
 
-echo %O2%        [*] Processing OLE/COM and System DLL Registrations...%RESET%%BG_GLASS%
+echo %O2%        [*] Processing OLE/COM and System DLL Registrations...%RESET%
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
     echo                    [SUCCESS] dc2ws2.dll network subsystem ready.
 )
@@ -86,7 +83,7 @@ echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
 echo                    [SUCCESS] installed 'dc2url.bat' successfully.
 
-echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%%BG_GLASS%
+echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%
 
 reg add "HKCU\Software\dc2url\Launcher" /f /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 reg add "HKCU\Software\dc2url\Launcher" /f /v "NetworkSubsystem" /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2ws2.dll" >nul 2>&1
@@ -102,7 +99,7 @@ reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
 
-echo %O2%        [*] Auto Registering dc2url into Windows Installed Apps...%RESET%%BG_GLASS%
+echo %O2%        [*] Auto Registering dc2url into Windows Installed Apps...%RESET%
 
 for %%H in (HKLM HKCU) do (
     for %%N in ("" "\Wow6432Node") do (
@@ -118,7 +115,7 @@ for %%H in (HKLM HKCU) do (
     )
 )
 
-echo %O2%        [AVIS] Saving config and completing registration...%RESET%%BG_GLASS%
+echo %O2%        [AVIS] Saving config and completing registration...%RESET%
 
 setx /M dc2url_path "%FINAL_EXEC_DIR%" >nul 2>&1
 
@@ -129,12 +126,12 @@ powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]pub
 
 echo                    [SUCCESS] dc2url is now fully installed and at your command!
 echo.
-
+ 
 set "MIDI_OUTPUT=%BASE_DIR%\sound\transformers.mid"
 if not exist "%BASE_DIR%\sound" mkdir "%BASE_DIR%\sound"
 
 echo.
-echo %O2%        [*] Detecting sound settings ...%RESET%%BG_GLASS%
+echo %O2%        [*] Detecting sound settings ...%RESET%
 
 set "SOUND_SETTING=off"
 for /f "tokens=2*" %%A in ('reg query "HKCU\Software\Eclipse\Launcher" /v "SoundArg" 2^>nul') do (
@@ -152,14 +149,14 @@ if /i "%SOUND_SETTING%"=="on" (
         
         if !FILESIZE! LSS 1000 goto bad_file
         echo.
-        echo %Y2%        [Transformation] TRANSFORM... %RESET%%BG_GLASS%
+        echo %Y2%        [Transformation] TRANSFORM... %RESET%
         start "" "%MIDI_OUTPUT%"
         
     ) else (
         echo [AVIS ERROR] Binary download failed.
     )
 ) else (
-    echo %TXT%        [INFO] Skipping audio playback.%RESET%%BG_GLASS%
+    echo %TXT%        [INFO] Skipping audio playback.%RESET%
 )
 goto finish
 
@@ -168,29 +165,29 @@ echo [AVIS FAILURE] File size is too small (!FILESIZE! bytes). Check network or 
 
 :finish
 echo.
-echo %Y2%        [To uninstall, go to Add/Remove Programs or run uninstall.bat]%RESET%%BG_GLASS%
+echo %Y2%        [To uninstall, go to Add/Remove Programs or run uninstall.bat]%RESET%
 echo.
 echo %TXT%        Your copy of dc2url in now installed cmd:\ dc2url -nojs [curl compat]...%RESET%
 echo.
 
 if not exist "%BASE_DIR%\setup.bat" goto :no_setup
 
-choice /c YN /n /m "%O2%        [?] Update/Install/Re-install Eclipse for dc2url v1.1 ? (Y/N)%RESET%%BG_GLASS%"
+choice /c YN /n /m "%O2%        [?] Update/Install/Re-install Eclipse for dc2url v1.1 ? (Y/N)%RESET%"
 
 if errorlevel 2 goto :skip_setup
 if errorlevel 1 goto :run_setup
 
 :run_setup
-echo %O2%        [*] Launching local setup...%RESET%%BG_GLASS%
+echo %O2%        [*] Launching local setup...%RESET%
 call "%BASE_DIR%\setup.bat"
 goto :setup_end
 
 :skip_setup
-echo %Y2%        [INFO] Exiting...%RESET%%BG_GLASS%
+echo %Y2%        [INFO] Exiting...%RESET%
 goto :setup_end
 
 :no_setup
-echo %Y2%        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%%BG_GLASS%
+echo %Y2%        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%
 
 :setup_end
 echo.
