@@ -113,7 +113,7 @@ function Get-FreshScript {
     )
     
     $remoteUrl = "$RepoUrl/$FileName"
-    Write-Host "  [PULL] Fetching fresh copy of $FileName from remote repository..." -ForegroundColor DarkYellow
+    Write-Host "  [Mercwar AI] Downlinking copy of $FileName from github ..." -ForegroundColor DarkYellow
     
     if (Test-Path $DestinationPath) {
         Remove-Item -Path $DestinationPath -Force -ErrorAction SilentlyContinue
@@ -122,10 +122,10 @@ function Get-FreshScript {
     try {
         # Cache-Control no-cache header ensures GitHub raw proxies deliver fresh code
         Invoke-WebRequest -Uri $remoteUrl -OutFile $DestinationPath -UseBasicParsing -Headers @{"Cache-Control"="no-cache, no-store, must-revalidate"}
-        Write-Host "  [PULL SUCCESS] Fresh copy of $FileName saved to disk." -ForegroundColor White
+        Write-Host "  [Mercwar AI SUCCESS] copy of $FileName saved to disk." -ForegroundColor White
         return $true
     } catch {
-        Write-Host "  [PULL ERROR] Failed to download fresh copy of $FileName from $remoteUrl : $_" -ForegroundColor Red
+        Write-Host "  [Mercwar AI ERROR] Failed to download fresh copy of $FileName from $remoteUrl : $_" -ForegroundColor Red
         return $false
     }
 }
@@ -170,7 +170,7 @@ if ($isInstalled) {
         $dc2urlRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $dc2urlSource))
     }
 
-    Write-Header -StatusText "dc2URL command detected at: $dc2urlSource"
+    Write-Header -StatusText "dc2url command detected at: $dc2urlSource"
     
     Write-Host "  [AVIS ECLIPSE] Select operational mode:" -ForegroundColor Yellow
     Write-Host "    [1] Install/Reinstall Eclipse (Fresh setup)"    -ForegroundColor White
@@ -261,11 +261,11 @@ if ($isInstalled) {
 }
 
 # Initial installation path when dc2url is not detected
-Write-Header -StatusText "Contacting server for fresh installer..."
+Write-Header -StatusText "  [Mercwar AI] Contacting server for fresh installer..."
 
 $TempInstaller = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
 if (-not (Get-FreshScript -FileName $LauncherFile -DestinationPath $TempInstaller)) {
-    Write-Host "  [FATAL] Initial download failed." -ForegroundColor Red
+    Write-Host "   [Mercwar AI ERROR]  Initial download failed." -ForegroundColor Red
     Pause
     exit 1
 }
@@ -275,7 +275,7 @@ Show-GraphicalProgress -TaskTitle "Initializing Subsystems" -DurationMs 1800
 try {
     Start-Process -FilePath "cmd.exe" -ArgumentList "/c `"$TempInstaller`"" -Wait -NoNewWindow -ErrorAction Stop
 } catch {
-    Write-Host "  [ERROR] Execution failed: $_" -ForegroundColor Red
+    Write-Host "  [Mercwar AI ERROR] Execution failed: $_" -ForegroundColor Red
 } finally {
     if (Test-Path $TempInstaller) {
         Remove-Item $TempInstaller -Force -ErrorAction SilentlyContinue
@@ -291,7 +291,12 @@ Write-Footer
 # PROCESS FINISHED: TERMINAL EXIT GUARD
 # =========================================================================
 Write-Host ""
-Write-Host "   Mercwar AI is finished. Press any key to exit..." -ForegroundColor Yellow
+Write-Host "                    Mercwar AI (c) 2026 . Made with Gemini (R) Google Inc." -ForegroundColor Gray
+Write-Host "                    Powered by Microsoft (R) Edge WebView2 Subsystem Runtime Context" -ForegroundColor DarkGray
+Write-Host ""
+Write-Host ""
+Write-Host "   [Mercwar AI AVIS] Eco-System Installed. Press any key to exit..." -ForegroundColor Yellow
+Write-Host ""
 Write-Host ""
 # Captures a single raw keypress natively without forcing the user to hit Enter
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
