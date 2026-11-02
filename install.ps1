@@ -134,13 +134,33 @@ $isInstalled  = $false
 $dc2urlSource = $null
 $dc2urlRoot   = $null
 
-# Exclusively check PATH entries for dc2url.exe
-$env:PATH -split ';' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object {
-    $cleanPath = $_.Trim('"').Trim()
-    $candidateExe = Join-Path $cleanPath "dc2url.exe"
-    if (Test-Path $candidateExe) {
-        $dc2urlSource = $candidateExe
-        $isInstalled = $true
+# 1. Check if dc2url.exe is registered in Windows App Paths registry keys
+$appPathRegistryKeys = @(
+    "Registry::HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe",
+    "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe",
+    "Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe"
+)
+
+foreach ($regKey in $appPathRegistryKeys) {
+    if (Test-Path $regKey) {
+        $exePath = (Get-ItemProperty -Path $regKey -Name "(default)" -ErrorAction SilentlyContinue)."(default)"
+        if ($exePath -and (Test-Path $exePath)) {
+            $dc2urlSource = $exePath
+            $isInstalled = $true
+            break
+        }
+    }
+}
+
+# 2. Fallback: Scan system PATH exclusively for dc2url.exe existence
+if (-not $isInstalled) {
+    $env:PATH -split ';' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object {
+        $cleanPath = $_.Trim('"').Trim()
+        $candidateExe = Join-Path $cleanPath "dc2url.exe"
+        if (Test-Path $candidateExe) {
+            $dc2urlSource = $candidateExe
+            $isInstalled = $true
+        }
     }
 }
 
@@ -156,7 +176,7 @@ if ($isInstalled) {
         $dc2urlRoot = Split-Path -Parent (Split-Path -Parent (Split-Path -Parent $dc2urlSource))
     }
 
-    Write-Header -StatusText "dc2url command detected at: $dc2urlSource"
+    Write-Header -StatusText "dc2url.exe detected at: $dc2urlSource"
     
     Write-Host "  [AVIS ECLIPSE] Select operational mode:" -ForegroundColor Yellow
     Write-Host "    [1] Install/Reinstall Eclipse (Fresh setup)"    -ForegroundColor White
@@ -246,8 +266,8 @@ if ($isInstalled) {
     }
 }
 
-# Initial installation path when dc2url is not detected
-Write-Header -StatusText "  [Mercwar AI] Contacting server for installer..."
+# Initial installation path when dc2url.exe is not detected via App Paths or PATH
+Write-Header -StatusText "  [Mercwar AI] Contacting server for  installer..."
 
 $TempInstaller = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
 if (-not (Get-FreshScript -FileName $LauncherFile -DestinationPath $TempInstaller)) {
