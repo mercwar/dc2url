@@ -288,8 +288,6 @@ try {
     }
 }
 
-Write-Footer
-
 # Render bottom UI layout lines
 Write-Footer
 
