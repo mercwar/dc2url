@@ -37,7 +37,7 @@ echo.
 echo  %G2%  [Eclipse] Downloading current version, please wait..%RESET%%BG_GLASS%
 
 if exist "%TEMP_CONFIG%" del /f /q "%TEMP_CONFIG%" >nul 2>&1
-dc2url -dc2ws2 -s "%CONFIG_URL%" -o "%TEMP_CONFIG%"
+dc2url  -dc2ws2 -s "%CONFIG_URL%"-o "%TEMP_CONFIG%"
 
 set "VERSION_TAG=v1.1"
 if exist "%TEMP_CONFIG%" (
@@ -169,27 +169,23 @@ if exist "%TARGET%\eclipse.ico" (
 :: =========================================================================
 :: SHORTCUT CREATION (Safe VBScript Engine Delivery)
 :: =========================================================================
-echo %O2%    [*] Generating Desktop and Program Files shortcuts...%RESET%
+echo %O2%    [*] Generating Desktop shortcut...%RESET%
 set "VBS_SCRIPT=%TEMP%\make_eclipse_lnk.vbs"
 if exist "%VBS_SCRIPT%" del /f /q "%VBS_SCRIPT%" >nul 2>&1
 
-:: Build the unescaped raw VBS engine builder block code safely on disk
 echo Set ws = CreateObject("WScript.Shell") > "%VBS_SCRIPT%"
 echo Set fso = CreateObject("Scripting.FileSystemObject") >> "%VBS_SCRIPT%"
 echo ico = "%FINAL_EXEC_DIR%\eclipse.ico" >> "%VBS_SCRIPT%"
 echo If Not fso.FileExists(ico) Then ico = "%TARGET%\eclipse.ico" >> "%VBS_SCRIPT%"
-echo paths = Array(ws.SpecialFolders("Desktop"), ws.ExpandEnvironmentStrings("%%ProgramData%%") ^& "\Microsoft\Windows\Start Menu\Programs") >> "%VBS_SCRIPT%"
-echo For Each d In paths >> "%VBS_SCRIPT%"
-echo     If fso.FolderExists(d) Then >> "%VBS_SCRIPT%"
-echo         Set lnk = ws.CreateShortcut(d ^& "\Eclipse.lnk") >> "%VBS_SCRIPT%"
-echo         lnk.TargetPath = "%FINAL_EXE_PATH%" >> "%VBS_SCRIPT%"
-echo         lnk.WorkingDirectory = "%FINAL_EXEC_DIR%" >> "%VBS_SCRIPT%"
-echo         If fso.FileExists(ico) Then lnk.IconLocation = ico ^& ",0" >> "%VBS_SCRIPT%"
-echo         lnk.Save >> "%VBS_SCRIPT%"
-echo     End If >> "%VBS_SCRIPT%"
-echo Next >> "%VBS_SCRIPT%"
+echo d = ws.SpecialFolders("Desktop") >> "%VBS_SCRIPT%"
+echo If fso.FolderExists(d) Then >> "%VBS_SCRIPT%"
+echo     Set lnk = ws.CreateShortcut(d ^& "\Eclipse.lnk") >> "%VBS_SCRIPT%"
+echo     lnk.TargetPath = "%FINAL_EXE_PATH%" >> "%VBS_SCRIPT%"
+echo     lnk.WorkingDirectory = "%FINAL_EXEC_DIR%" >> "%VBS_SCRIPT%"
+echo     If fso.FileExists(ico) Then lnk.IconLocation = ico ^& ",0" >> "%VBS_SCRIPT%"
+echo     lnk.Save >> "%VBS_SCRIPT%"
+echo End If >> "%VBS_SCRIPT%"
 
-:: Fire off the temporary clean runtime script container safely
 cscript //nologo "%VBS_SCRIPT%" >nul 2>&1
 if exist "%VBS_SCRIPT%" del /f /q "%VBS_SCRIPT%" >nul 2>&1
 
@@ -201,7 +197,7 @@ for %%U in (
     "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
     "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse"
 ) do (
-    reg add "%%~U" /f /v "DisplayName" /t REG_SZ /d "Eclipse" >nul 2>&1
+    reg add "%%~U" /f /v "DisplayName" /t REG_SZ /d "Eclipse %VERSION_TAG%" >nul 2>&1
     reg add "%%~U" /f /v "UninstallString" /t REG_SZ /d "\"%TARGET%\uninstall.bat\"" >nul 2>&1
     reg add "%%~U" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_TAG%" >nul 2>&1
     reg add "%%~U" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
