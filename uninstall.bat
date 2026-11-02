@@ -11,17 +11,13 @@ if '%errorlevel%' neq '0' ( goto :RequestUAC ) else ( goto :ExecuteUninstaller )
 :ExecuteUninstaller
 setlocal EnableDelayedExpansion
 
-:: Store original script directory immediately
 set "SCRIPT_DIR=%~dp0"
-
-:: 1. Define Target Paths matching the installer version schema layout dynamically
 set "VERSION_TAG=v1.1"
 set "TARGET=%ProgramFiles%\dc2url"
 set "TARGET_BASE=%TARGET%\%VERSION_TAG%"
 set "FINAL_EXEC_DIR=%TARGET_BASE%\exec"
 
 title Eclipse Uninstaller Engine [%VERSION_TAG%]
-
 mode con: cols=120 lines=36
 chcp 65001 >nul 2>&1
 color 0E
@@ -49,30 +45,40 @@ echo %Y1%        ██╔══╝  ██║     ██║     ██║██
 echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                        Eclipse Uninstaller Pipeline :: %VERSION_TAG%%RESET%%BG_GLASS%
+echo %Y2%                        Eclipse Uninstaller Pipeline :: %VERSION_TAG% %RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
 :: =========================================================================
-:: 1. PROCESS TERMINATION & SHORTCUT PURGE (ICONS ONLY)
+:: 1. PROCESS TERMINATION & EXPLICIT DESKTOP/START MENU SHORTCUT PURGE
 :: =========================================================================
 echo %R2%        [*] Closing active Eclipse programs...%RESET%%BG_GLASS%
 taskkill /f /im eclipse.exe >nul 2>&1
 
-echo %R2%        [*] Purging workspace link shortcuts (Files only)...%RESET%%BG_GLASS%
+:: =========================================================================
+:: COMPREHENSIVE SHORTCUT PURGE (INCLUDING ONEDRIVE REDIRECTION)
+:: =========================================================================
+echo %R2%        [*] Purging desktop and start menu shortcuts...%RESET%%BG_GLASS%
 
-:: Desktop Shortcuts (User & Public)
-if exist "%USERPROFILE%\Desktop\Eclipse.lnk" del /f /q "%USERPROFILE%\Desktop\Eclipse.lnk" >nul 2>&1
+for /f "delims=" %%U in ('dir /b /ad "C:\Users"') do (
+    :: Standard Local Desktop & Start Menu
+    if exist "C:\Users\%%U\Desktop\Eclipse.lnk" del /f /q "C:\Users\%%U\Desktop\Eclipse.lnk" >nul 2>&1
+    if exist "C:\Users\%%U\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" del /f /q "C:\Users\%%U\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" >nul 2>&1
+    if exist "C:\Users\%%U\AppData\Roaming\Microsoft\Windows\Start Menu\Eclipse.lnk" del /f /q "C:\Users\%%U\AppData\Roaming\Microsoft\Windows\Start Menu\Eclipse.lnk" >nul 2>&1
+    
+    :: OneDrive Redirected Desktops
+    if exist "C:\Users\%%U\OneDrive\Desktop\Eclipse.lnk" del /f /q "C:\Users\%%U\OneDrive\Desktop\Eclipse.lnk" >nul 2>&1
+    if exist "C:\Users\%%U\OneDrive - Personal\Desktop\Eclipse.lnk" del /f /q "C:\Users\%%U\OneDrive - Personal\Desktop\Eclipse.lnk" >nul 2>&1
+)
+
+:: Public & Common Desktop/Start Menu Fallbacks
 if exist "%PUBLIC%\Desktop\Eclipse.lnk" del /f /q "%PUBLIC%\Desktop\Eclipse.lnk" >nul 2>&1
-
-:: Start Menu Root Shortcuts (User & Public)
-if exist "%APPDATA%\Microsoft\Windows\Start Menu\Eclipse.lnk" del /f /q "%APPDATA%\Microsoft\Windows\Start Menu\Eclipse.lnk" >nul 2>&1
-if exist "%ProgramData%\Microsoft\Windows\Start Menu\Eclipse.lnk" del /f /q "%ProgramData%\Microsoft\Windows\Start Menu\Eclipse.lnk" >nul 2>&1
-
-:: Programs Folder Shortcuts (User & Public)
-if exist "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" del /f /q "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" >nul 2>&1
+if exist "C:\Users\Public\Desktop\Eclipse.lnk" del /f /q "C:\Users\Public\Desktop\Eclipse.lnk" >nul 2>&1
 if exist "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" del /f /q "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" >nul 2>&1
 
+:: Force Windows Explorer to flush its shell icon cache and refresh the desktop view
+ie4uinit.exe -show >nul 2>&1
+powershell -Command "$code = '[DllImport(\"shell32.dll\")] public static extern void SHChangeNotify(int wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);'; Add-Type -MemberDefinition $code -Name Shell -Namespace Win32; [Win32.Shell]::SHChangeNotify(0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero);" >nul 2>&1
 :: =========================================================================
 :: 2. REGISTRY CLEANUP
 :: =========================================================================
@@ -87,7 +93,6 @@ reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
 echo %R2%                     [OK] Removed Eclipse...%RESET%%BG_GLASS%
-
 
 :: =========================================================================
 :: 3. ENVIRONMENT PATH PURGE & BROADCAST
@@ -113,7 +118,6 @@ if exist "%FINAL_EXEC_DIR%\menu.json" del /f /q "%FINAL_EXEC_DIR%\menu.json" >nu
 if exist "%FINAL_EXEC_DIR%\eclipse.ico" del /f /q "%FINAL_EXEC_DIR%\eclipse.ico" >nul 2>&1
 if exist "%TARGET%\eclipse.ico" del /f /q "%TARGET%\eclipse.ico" >nul 2>&1
 
-:: Clean up directory tree nodes only if they are now totally empty
 rmdir "%FINAL_EXEC_DIR%" >nul 2>&1
 rmdir "%TARGET_BASE%" >nul 2>&1
 rmdir "%TARGET%" >nul 2>&1
