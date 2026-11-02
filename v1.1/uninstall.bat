@@ -46,22 +46,22 @@ echo %BG_GLASS%
 cls
 
 echo.
-echo %O1%      ######   #####  ######  ##  ##  #####  ######  ###   ### ###### %RESET%%BG_GLASS%
-echo %O2%      ##   ## ##   ## ##   ## ## ##   ##     ##   ## #### ####     ## %RESET%%BG_GLASS%
-echo %O3%      ##   ## ####### ######  #####   ##     ##   ## ## ### ##  ##### %RESET%%BG_GLASS%
-echo %Y1%      ##   ## ##   ## ##   ## ##  ##  ##     ##   ## ##     ##      ## %RESET%%BG_GLASS%
-echo %Y2%      ######  ##   ## ##   ## ##  ##   #####  #####  ##     ## ####### %RESET%%BG_GLASS%
-echo %O2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                        dc2url Core Cyborg Ecosystem Uninstaller%RESET%%BG_GLASS%
-echo %O2%    ====================================================================================%RESET%%BG_GLASS%
+echo %O1%        ██████╗   █████╗ ██████╗ ██╗  ██╗ ██████╗ ██████╗ ███╗   ███╗██████╗ %RESET%
+echo %O2%        ██╔══██╗ ██╔══██╗██╔══██╗██║ ██╔╝██╔════╝██╔═══██╗████╗ ████║╚════██╗%RESET%
+echo %O3%        ██║  ██║ ███████║██████╔╝█████╔╝ ██║     ██║   ██║██╔████╔██║ █████╔╝%RESET%
+echo %Y1%        ██║  ██║ ██╔══██║██╔══██║██╔══██║ ██║     ██║   ██║██║╚██╔╝██║██╔═══╝ %RESET%
+echo %Y2%        ██████╔v ██║  ██║██║  ██║██║  ██║╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%
+echo %Y2%        ╚═════╝  ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%
+echo %O2%    ====================================================================================%RESET%
+echo %Y2%                        dc2url Core Cyborg Ecosystem Uninstaller%RESET%
+echo %O2%    ====================================================================================%RESET%
 echo.
 
-echo %O2%        [*] Terminating active dc2url execution processes...%RESET%%BG_GLASS%
+echo %O2%        [*] Terminating active dc2url execution processes...%RESET%
 taskkill /f /im dc2url.exe >nul 2>&1
 
-echo %O2%        [*] Removing Windows Registry App Paths and Uninstaller Keys...%RESET%%BG_GLASS%
+echo %O2%        [*] Removing Windows Registry App Paths and Uninstaller Keys...%RESET%
 
-:: FIXED: Replaced the typos ":=" token separator layout directly with an opening batch script loop parenthesis
 for %%H in (HKLM HKCU) do (
     for %%N in ("" "\Wow6432Node") do (
         reg delete "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
@@ -70,7 +70,7 @@ for %%H in (HKLM HKCU) do (
 )
 reg delete "HKCU\Software\dc2url\Launcher" /f >nul 2>&1
 
-echo %O2%        [*] Purging Environment Variable PATH entries...%RESET%%BG_GLASS%
+echo %O2%        [*] Purging Environment Variable PATH entries...%RESET%
 
 reg delete "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v "dc2url_path" /f >nul 2>&1
 
@@ -79,19 +79,19 @@ powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','Use
 
 powershell -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
-echo %O2%        [*] Cleaning up execution binaries and temporary files...%RESET%%BG_GLASS%
+echo %O2%        [*] Cleaning up execution binaries and temporary files...%RESET%
 
 if exist "%FINAL_EXEC_DIR%" (
     rmdir /s /q "%FINAL_EXEC_DIR%" >nul 2>&1
 )
 
-echo                     [SUCCESS] dc2url has been completely uninstalled.
+echo                    [SUCCESS] dc2url has been completely uninstalled.
 echo.
 
 :finish
-echo %Y2%        [Mercwar AI] Uninstallation sequence finalized successfully.%RESET%%BG_GLASS%
+echo %Y2%        [Mercwar AI] Uninstallation sequence finalized successfully.%RESET%
 echo.
-echo %Y2%        [Mercwar AI] This window will close in 3 seconds.%RESET%%BG_GLASS%
+echo %Y2%        [Mercwar AI] This window will close in 3 seconds.%RESET%
 timeout /t 3 >nul
 endlocal
 exit /b 0
