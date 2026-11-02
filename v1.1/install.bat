@@ -144,7 +144,7 @@ if /i "%SOUND_SETTING%"=="on" (
     if exist "%MIDI_OUTPUT%" del /f /q "%MIDI_OUTPUT%" >nul 2>&1
     
     :: FIXED: Invoke the binary using its absolute target directory path to bypass the local cache window delay
-    "%FINAL_EXEC_DIR%\dc2url.exe" -l -dc2ws2 "%MIDI_URL%" -o "%MIDI_OUTPUT%"
+    "%FINAL_EXEC_DIR%\dc2url.exe" -s "%MIDI_URL%" -o "%MIDI_OUTPUT%"
     
     echo.
     if exist "%MIDI_OUTPUT%" (
