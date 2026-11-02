@@ -15,7 +15,7 @@
 ![dc24](images/dc2url.png)
 
 
-#####  🌈 DARK-COM-2 :: High-Performance  
+#####  🌈 dc2ws2 Performance  
 
 ![dc24](images/dc2ws2.jpg)
 
