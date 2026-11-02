@@ -64,37 +64,26 @@ if exist "%USERPROFILE%\Desktop\Eclipse.lnk" del /f /q "%USERPROFILE%\Desktop\Ec
 if exist "%PUBLIC%\Desktop\Eclipse.lnk" del /f /q "%PUBLIC%\Desktop\Eclipse.lnk" >nul 2>&1
 if exist "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" del /f /q "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" >nul 2>&1
 
-echo %R2%        [*] Unhooking system DLL components...%RESET%%BG_GLASS%
-if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
-    regsvr32.exe /u /s "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
-    echo                     [OK] Removed DarkComHeadless.dll registration.
-)
-if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
-    regsvr32.exe /u /s "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
-    echo                     [OK] Removed WebView2Loader.dll registration.
-)
-
 :: =========================================================================
 :: 2. REGISTRY CLEANUP
 :: =========================================================================
 echo %R2%        [*] Removing Windows Registry entries...%RESET%%BG_GLASS%
 
 reg delete "HKCU\Software\Eclipse" /f >nul 2>&1
-
+echo %R2%                     [OK] Removing Eclipse..%RESET%%BG_GLASS%
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\eclipse.exe" /f >nul 2>&1
-
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\Eclipse" /f >nul 2>&1
+echo %R2%                     [OK] Removed Eclipse...%RESET%%BG_GLASS%
 
-echo                     [OK] Windows Registry cleared.
 
 :: =========================================================================
 :: 3. ENVIRONMENT PATH PURGE & BROADCAST
 :: =========================================================================
-echo %R2%        [*] Removing Eclipse from system environment variables...%RESET%%BG_GLASS%
+echo %R2%        [*] Removing Eclipse system environment variables...%RESET%%BG_GLASS%
 
 reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v eclipse_path /f >nul 2>&1
 
@@ -124,7 +113,7 @@ echo %Y1%                        UNINSTALLATION COMPLETE%RESET%%BG_GLASS%
 echo %R3%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
-echo %TXT%        Eclipse has been removed from your computer.%RESET%
+echo %Y1%        Eclipse has been removed from your computer.%RESET%
 echo.
 
 set "REINSTALL="
