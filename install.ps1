@@ -291,8 +291,8 @@ Write-Footer
 # PROCESS FINISHED: TERMINAL EXIT GUARD
 # =========================================================================
 Write-Host ""
-Write-Host ">>> Mercwar AI is finished. Press any key to exit..." -ForegroundColor Yellow
-
+Write-Host "   Mercwar AI is finished. Press any key to exit..." -ForegroundColor Yellow
+Write-Host ""
 # Captures a single raw keypress natively without forcing the user to hit Enter
 $null = $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
 Exit
