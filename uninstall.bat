@@ -49,19 +49,28 @@ echo %Y1%        ██╔══╝  ██║     ██║     ██║██
 echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
 echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
-echo %Y2%                              Eclipse Uninstaller Pipeline :: %VERSION_TAG%%RESET%%BG_GLASS%
+echo %Y2%                        Eclipse Uninstaller Pipeline :: %VERSION_TAG%%RESET%%BG_GLASS%
 echo %R2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 
 :: =========================================================================
-:: 1. PROCESS TERMINATION & SHORTCUT PURGE
+:: 1. PROCESS TERMINATION & SHORTCUT PURGE (ICONS ONLY)
 :: =========================================================================
 echo %R2%        [*] Closing active Eclipse programs...%RESET%%BG_GLASS%
 taskkill /f /im eclipse.exe >nul 2>&1
 
-echo %R2%        [*] Purging workspace link shortcuts...%RESET%%BG_GLASS%
+echo %R2%        [*] Purging workspace link shortcuts (Files only)...%RESET%%BG_GLASS%
+
+:: Desktop Shortcuts (User & Public)
 if exist "%USERPROFILE%\Desktop\Eclipse.lnk" del /f /q "%USERPROFILE%\Desktop\Eclipse.lnk" >nul 2>&1
 if exist "%PUBLIC%\Desktop\Eclipse.lnk" del /f /q "%PUBLIC%\Desktop\Eclipse.lnk" >nul 2>&1
+
+:: Start Menu Root Shortcuts (User & Public)
+if exist "%APPDATA%\Microsoft\Windows\Start Menu\Eclipse.lnk" del /f /q "%APPDATA%\Microsoft\Windows\Start Menu\Eclipse.lnk" >nul 2>&1
+if exist "%ProgramData%\Microsoft\Windows\Start Menu\Eclipse.lnk" del /f /q "%ProgramData%\Microsoft\Windows\Start Menu\Eclipse.lnk" >nul 2>&1
+
+:: Programs Folder Shortcuts (User & Public)
+if exist "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" del /f /q "%APPDATA%\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" >nul 2>&1
 if exist "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" del /f /q "%ProgramData%\Microsoft\Windows\Start Menu\Programs\Eclipse.lnk" >nul 2>&1
 
 :: =========================================================================
@@ -101,6 +110,8 @@ echo %R2%        [*] Deleting Eclipse application files...%RESET%%BG_GLASS%
 
 if exist "%FINAL_EXEC_DIR%\eclipse.exe" del /f /q "%FINAL_EXEC_DIR%\eclipse.exe" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\menu.json" del /f /q "%FINAL_EXEC_DIR%\menu.json" >nul 2>&1
+if exist "%FINAL_EXEC_DIR%\eclipse.ico" del /f /q "%FINAL_EXEC_DIR%\eclipse.ico" >nul 2>&1
+if exist "%TARGET%\eclipse.ico" del /f /q "%TARGET%\eclipse.ico" >nul 2>&1
 
 :: Clean up directory tree nodes only if they are now totally empty
 rmdir "%FINAL_EXEC_DIR%" >nul 2>&1
