@@ -265,49 +265,210 @@ dc2url http://localhost:8080/api/status -H "Authorization: Bearer token_abc123" 
 * **Runtime Dependency:** Microsoft Edge WebView2 Evergreen Runtime.
 * **Permissions:** Read/write access in the execution directory for automated profile persistence and session caching.
 ---
+Here is the fully merged, corrected, and comprehensive manual for **PART I (End-User CLI Manual)** and **PART II (Redistributable SDK & Deployment Reference)**.
+
+This update standardizes binary names to `dc2url` (while maintaining compatibility with `darkcom2.exe`), updates all flag tables to include the complete set of primary and secondary engine switches, expands the command-line usage examples to teach every invocation pattern step-by-step, and explicitly covers private server file downloads with switch restrictions.
+
+---
 
 # PART I: DARK-COM-2 END-USER CLI MANUAL
 
 ## 1. Overview & Syntax
 
-`darkcom2.exe` is a high-performance, cURL-compatible command-line HTTP client powered by an embedded Microsoft Edge WebView2 execution core. It supports standard command-line ordering, persistent session/cookie management, and custom payload injection.
+`dc2url` (also distributed as `darkcom2.exe`) is a high-performance, cURL-compatible command-line HTTP client powered by an embedded Microsoft Edge WebView2 execution core. It bridges standard cURL CLI syntax with full Chromium document execution, supporting flexible argument ordering, persistent session/cookie management, custom payload injection, and direct low-overhead binary downloads via secondary network engine fallbacks.
 
 ```cmd
-darkcom2.exe [options] <url>
+dc2url [options] <url>
 
 ```
 
-## 2. Command-Line Flags Reference
+---
+
+## 2. Interactive CLI Reference Banner
+
+Running `dc2url` without arguments or with the `-h` / `--help` flag displays the complete built-in runtime command reference:
+
+```text
+====================================================================
+  Dark-Com-2 Curl-Compatible Console Wrapper (dc2url v2.6)
+====================================================================
+Usage:    dc2url [options] <url>
+
+[PRIMARY CORE OPTIONS]
+  -X, --request <method>    Specify HTTP method (GET, POST, PUT, DELETE)
+  -d, --data <data>         Attach raw payload string or JSON body
+  -o, --output <file>       Stream raw response directly to disk file
+  -h, --help                Display this reference manual
+
+[SECONDARY PROTOCOL OPTIONS]
+  -H, --header <header>     Inject custom header (e.g., "Authorization: Bearer...")
+  -A, --user-agent <agent>  Override default client identification string
+  -s, --silent              Suppress all non-error output streams
+  -v, --verbose             Enable detailed diagnostic trace logs to stderr
+  -l, --local               Force loading DarkComHeadless.dll from executable folder
+  --nojs, -nojs             Bypass WebView2 JS engine (WinINet fast binary stub mode)
+  --nowv2, -nowv2           Bypass WebView2 environment (Force dynamic dc2ws2 fallback)
+  --dc2ws2, -dc2ws2         Route request via dc2ws2 high-performance network engine DLL
+  --noscript, -noscript     Direct raw download mode via dc2ws2 (bypasses JS / WebView2)
+====================================================================
+
+```
+
+---
+
+## 3. Command-Line Flags Reference
+
+### Primary Core Options
 
 | Short Flag | Long Flag | Description |
 | --- | --- | --- |
-| `-X` | `--request <method>` | Specifies the HTTP method to use (e.g., `GET`, `POST`, `PUT`, `DELETE`). Defaults to `GET` unless a payload is supplied. |
-| `-d` | `--data <data>` | Supplies a raw string or JSON payload body for transmission. Providing data automatically promotes the request method to `POST`. |
-| `-H` | `--header <header>` | Passes custom HTTP headers (e.g., `-H "Content-Type: application/json"`). |
-| `-v` | `--verbose` | Enables detailed wire logging, mirroring standard cURL output formatting (`>` for outbound requests, `<` for inbound response headers). |
+| `-X` | `--request <method>` | Explicitly sets the HTTP verb (`GET`, `POST`, `PUT`, `DELETE`). Supplying data via `-d` automatically promotes `GET` requests to `POST`. |
+| `-d` | `--data <data>` | Attaches a raw string payload or JSON body for transmission. |
+| `-o` | `--output <file>` | Streams the raw HTTP response body directly to a specified destination file on disk. |
+| `-h` | `--help` | Displays the built-in CLI reference manual banner. |
 
-## 3. Usage Examples
+### Secondary Protocol & Engine Options
 
-**Standard cURL Style (URL First):**
+| Short Flag | Long Flag | Description |
+| --- | --- | --- |
+| `-H` | `--header <header>` | Injects custom HTTP headers into the outbound request (e.g., `-H "Content-Type: application/json"`). Can be repeated for multiple headers. |
+| `-A` | `--user-agent <agent>` | Overrides the default client user-agent identification string sent to the remote host. |
+| `-s` | `--silent` | Suppresses all console output streams except critical execution errors. |
+| `-v` | `--verbose` | Enables detailed wire logging to `stderr`, outputting cURL-style diagnostic frames (`>` for outbound requests, `<` for inbound headers). |
+| `-l` | `--local` | Forces the binary to load `DarkComHeadless.dll` and dependencies directly from the local executable directory. |
+| *(None)* | `--nojs`, `-nojs` | Bypasses the full WebView2 JavaScript engine, switching into a fast WinINet binary stub mode. |
+| *(None)* | `--nowv2`, `-nowv2` | Bypasses the WebView2 environment completely, forcing dynamic fallback to the `dc2ws2` network engine. |
+| *(None)* | `--dc2ws2`, `-dc2ws2` | Explicitly routes network execution through the dedicated `dc2ws2` high-performance engine DLL. |
+| *(None)* | `--noscript`, `-noscript` | Enables direct raw download mode via `dc2ws2`, bypassing all client-side JavaScript execution and rendering overhead. |
+
+---
+
+## 4. Quick Start & Command Examples
+
+### Standard cURL Style (URL First)
+
+Placing the target URL immediately after the binary command follows traditional cURL conventions:
 
 ```cmd
-darkcom2.exe http://localhost:8080/echo.php -X POST -d "{\"action\":\"test\"}" -v
+dc2url http://localhost:8080/echo.php -X POST -d "{\"action\":\"test_url_first\"}" -v
 
 ```
 
-**Alternative Flag-First Style:**
+* **How to read this command:**
+* `http://localhost:8080/echo.php` — The destination HTTP endpoint receiving the request.
+* `-X POST` — Explicitly defines the request verb.
+* `-d "{\"action\":\"test_url_first\"}"` — Attaches a raw JSON payload string. Inner double quotes are escaped using backslashes (`\"`) for CMD compatibility.
+* `-v` — Outputs full wire tracing frame headers to `stderr`.
+
+
+
+### Alternative Flag-First Style
+
+Operational switches and data payloads can be placed prior to the target URL:
 
 ```cmd
-darkcom2.exe -X POST -d "{\"action\":\"test\"}" http://localhost:8080/echo.php --verbose
+dc2url -X POST -d "{\"action\":\"test_flags_first\"}" http://localhost:8080/echo.php --verbose
 
 ```
 
-**Long Flags Style:**
+* **How to read this command:**
+* `-X POST -d ...` — Pre-configures request parameters before the parser encounters the target endpoint.
+* `http://localhost:8080/echo.php` — Processed as the destination URL.
+* `--verbose` — Uses the long-form flag variant to enable live wire logging.
+
+
+
+### Long Flags Style
+
+Use descriptive long-form switches for script clarity and enterprise documentation:
 
 ```cmd
-darkcom2.exe --request POST --data "{\"action\":\"test\"}" http://localhost:8080/echo.php -v
+dc2url --request POST --data "{\"action\":\"test_long_flags\"}" http://localhost:8080/echo.php -v
 
 ```
+
+* **How to read this command:**
+* `--request POST` — Explicit long-form HTTP method switch.
+* `--data "..."` — Explicit long-form data payload switch.
+
+
+
+---
+
+## 5. Private Server Downloads & Engine Restrictions
+
+When downloading binaries, configuration manifests, or setup archives from private servers, custom PHP gateways, or restricted local endpoints, client-side JavaScript execution or complex CLI flags may cause processing errors.
+
+When retrieving files from these restricted environments, `dc2url` limits operational parameters strictly to **silent (`-s`)** or **verbose (`-v`)** output controls combined with direct disk streaming (`-o`):
+
+### Basic Private Server Download (Silent Mode)
+
+```cmd
+dc2url -s "http://mercwar01.byethost3.com/darkcom2/downlink/eclipse/eclipse.zip" -o "eclipse.zip"
+
+```
+
+* **Usage:** Downloads `eclipse.zip` directly from the host to the local working folder without emitting console progress output.
+
+### Diagnostic Private Server Download (Verbose Mode)
+
+```cmd
+dc2url -v "http://mercwar01.byethost3.com/darkcom2/downlink/eclipse/menu.json" -o "menu.json"
+
+```
+
+* **Usage:** Downloads `menu.json` while outputting HTTP headers (`>` and `<`) to `stderr` to verify response codes and content headers.
+
+### Bypassing JavaScript for Private Server Downloads (`--nojs` / `--nowv2`)
+
+```cmd
+dc2url --nojs -s "http://mercwar01.byethost3.com/darkcom2/downlink/eclipse/eclipse.zip" -o "eclipse.zip"
+
+```
+
+* **Usage:** Completely disables Chromium JS rendering, falling back to pure binary stream extraction for maximum performance on private host endpoints.
+
+---
+
+## 6. State Persistence & Local Profile
+
+* **Automated Profile Store:** On initial startup, the application provisions a local state folder named `darkcom_browser_profile` directly within the working directory.
+* **Session Continuity:** Cookies, local storage keys, and server session tokens (such as `PHPSESSID`) automatically persist across sequential executions, ensuring seamless API session tracking.
+
+---
+
+# PART II: REDISTRIBUTABLE SDK & DEPLOYMENT REFERENCE
+
+## 1. Redistributable Package Layout
+
+Deploying the Dark-Com-2 runtime environment across client workstations, build agents, or production server installations requires bundling the core execution components within the application directory:
+
+```text
+app_root/
+├── dc2url.exe               <-- CLI Host Executable (or darkcom2.exe)
+├── DarkComHeadless.dll      <-- Core Engine Library (IPC & WebView2 Host Routing)
+├── dc2ws2.dll               <-- High-Performance Native Network Engine DLL
+├── WebView2Loader.dll       <-- Official Microsoft Edge WebView2 Interop Loader
+└── darkcom_browser_profile/ <-- Automatically Provisioned Session & Cookie Store
+
+```
+
+| Component Name | Component Type | Functional Description |
+| --- | --- | --- |
+| `dc2url.exe` | Host Executable | Parses CLI arguments, manages the Win32 console loop, and dispatches engine execution parameters. |
+| `DarkComHeadless.dll` | Core Engine DLL | Encapsulates the WebView2 execution thread, manages document origin bindings, and routes IPC requests. |
+| `dc2ws2.dll` | Network Engine DLL | Supplies direct WinINet/Sockets network transport for high-speed binary downloads, bypassing JS overhead. |
+| `WebView2Loader.dll` | Interop Module | Standard Microsoft redistributable for dynamically locating and bootstrapping the system WebView2 runtime. |
+| `darkcom_browser_profile/` | Persistence Store | Local directory initialized at runtime to maintain cookies, local storage, and session tokens. |
+
+---
+
+## 2. Environment & Runtime Requirements
+
+* **Operating System:** Windows 10 or Windows 11 (64-bit x64 architecture).
+* **System Dependency:** Microsoft Edge WebView2 Evergreen Runtime must be installed on the host OS. If unavailable, execution gracefully falls back to the native `dc2ws2` network stub engine.
+* **Network Permissions:** Outbound TCP communication allowed on target ports (e.g., standard HTTP/HTTPS ports `80`/`443`, or local loopback `127.0.0.1` endpoints).
+* **Directory Access Permissions:** Write privileges within the binary working directory to allow runtime creation and modification of the `darkcom_browser_profile` state folder and temporary payload outputs.
 
 ## 4. State Persistence & Local Profile
 
