@@ -872,12 +872,13 @@ mercwar/dc2URL/
     ├── echo.bat         <-- Validation Utility (local and private host)
     ├── favi-con.ico     <-- Root Icon Asset
     ├── readme.MD        <-- User and Developer Reference
-    └── v1.0/
+    └── v1.X/
         ├── install.bat      <-- Windows 11 Installer  (Root level)
         ├── uninstall.bat    <-- Windows 11 Uninstaller (Root level)
             ├── exec/            <-- Executable Binaries Subfolder
             │   ├── darkcom2.exe
             │   ├── DarkComHeadless.dll
+			├   |── dc2ws2.dll
             │   └── WebView2Loader.dll
     ├── images/          <-- Documentation Graphics Subfolder
        ├── cmd-src.png
