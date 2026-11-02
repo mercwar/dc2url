@@ -64,7 +64,13 @@ set "count=0"
 for %%T in (dc2url python curl mshta powershell certutil cscript bitsadmin winget git) do (
     set "VALID=0"
     
-    if /i "%%T"=="python" (
+    if /i "%%T"=="dc2url" (
+        set "IN_PATH="
+        for %%p in ("%PATH:;=" "%") do (
+            if exist "%%~p\dc2url.exe" set "IN_PATH=1"
+        )
+        if defined IN_PATH set "VALID=1"
+    ) else if /i "%%T"=="python" (
         python -c "import sys" >nul 2>&1
         if !errorlevel! equ 0 (
             set "VALID=1"
