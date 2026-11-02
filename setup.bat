@@ -37,7 +37,7 @@ echo.
 echo  %G2%  [Eclipse] Downloading current version, please wait..%RESET%%BG_GLASS%
 
 if exist "%TEMP_CONFIG%" del /f /q "%TEMP_CONFIG%" >nul 2>&1
-dc2url  -dc2ws2 -s "%CONFIG_URL%"-o "%TEMP_CONFIG%"
+dc2url  -dc2ws2 -s "%CONFIG_URL%" -o "%TEMP_CONFIG%"
 
 set "VERSION_TAG=v1.1"
 if exist "%TEMP_CONFIG%" (
