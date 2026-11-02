@@ -89,8 +89,9 @@ echo                     [SUCCESS] dc2url has been completely uninstalled.
 echo.
 
 :finish
-echo %Y2%        [INFO] Uninstallation sequence finalized successfully.%RESET%%BG_GLASS%
+echo %Y2%        [Mercwar AI] Uninstallation sequence finalized successfully.%RESET%%BG_GLASS%
 echo.
+echo %Y2%        [Mercwar AI] This window will close in 3 seconds.%RESET%%BG_GLASS%
 timeout /t 3 >nul
 endlocal
 exit /b 0
