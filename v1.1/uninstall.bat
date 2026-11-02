@@ -61,7 +61,8 @@ taskkill /f /im dc2url.exe >nul 2>&1
 
 echo %O2%        [*] Removing Windows Registry App Paths and Uninstaller Keys...%RESET%%BG_GLASS%
 
-for %%H in (HKLM HKCU) do :=
+:: FIXED: Replaced the typos ":=" token separator layout directly with an opening batch script loop parenthesis
+for %%H in (HKLM HKCU) do (
     for %%N in ("" "\Wow6432Node") do (
         reg delete "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
         reg delete "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
@@ -71,7 +72,7 @@ reg delete "HKCU\Software\dc2url\Launcher" /f >nul 2>&1
 
 echo %O2%        [*] Purging Environment Variable PATH entries...%RESET%%BG_GLASS%
 
-reg delete "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v "dc2url_path" /f >nul 2>&1
+reg delete "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v "dc2url_path" /f >nul 2>&1
 
 powershell -Command "$m=[System.Environment]::GetEnvironmentVariable('PATH','Machine'); $arr = $m -split ';' | Where-Object {$_ -ne '%FINAL_EXEC_DIR%'}; [System.Environment]::SetEnvironmentVariable('PATH', ($arr -join ';'), 'Machine')" >nul 2>&1
 powershell -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','User'); $arr = $p -split ';' | Where-Object {$_ -ne '%FINAL_EXEC_DIR%'}; [System.Environment]::SetEnvironmentVariable('PATH', ($arr -join ';'), 'User')" >nul 2>&1
