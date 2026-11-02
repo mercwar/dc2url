@@ -45,7 +45,7 @@ if exist "%TEMP_CONFIG%" (
         set "VERSION_TAG=%%v"
     )
     del /f /q "%TEMP_CONFIG%" >nul 2>&1
-)       
+)        
 
 echo [+] Discovered Version Path Mapping: %VERSION_TAG% 
 
@@ -167,9 +167,9 @@ if exist "%TARGET%\eclipse.ico" (
 )
 
 :: =========================================================================
-:: SHORTCUT CREATION (Safe VBScript Engine Delivery)
+:: SHORTCUT CREATION (Safe VBScript Engine Delivery - Desktop & Start Menu)
 :: =========================================================================
-echo %O2%    [*] Generating Desktop shortcut...%RESET%
+echo %O2%    [*] Generating Desktop, Start Menu, and Programs folder shortcuts...%RESET%
 set "VBS_SCRIPT=%TEMP%\make_eclipse_lnk.vbs"
 if exist "%VBS_SCRIPT%" del /f /q "%VBS_SCRIPT%" >nul 2>&1
 
@@ -177,18 +177,40 @@ echo Set ws = CreateObject("WScript.Shell") > "%VBS_SCRIPT%"
 echo Set fso = CreateObject("Scripting.FileSystemObject") >> "%VBS_SCRIPT%"
 echo ico = "%FINAL_EXEC_DIR%\eclipse.ico" >> "%VBS_SCRIPT%"
 echo If Not fso.FileExists(ico) Then ico = "%TARGET%\eclipse.ico" >> "%VBS_SCRIPT%"
+echo dim d, sm, p, lnk1, lnk2, lnk3 >> "%VBS_SCRIPT%"
+echo. >> "%VBS_SCRIPT%"
+echo Rem 1. Create Desktop Shortcut >> "%VBS_SCRIPT%"
 echo d = ws.SpecialFolders("Desktop") >> "%VBS_SCRIPT%"
 echo If fso.FolderExists(d) Then >> "%VBS_SCRIPT%"
-echo     Set lnk = ws.CreateShortcut(d ^& "\Eclipse.lnk") >> "%VBS_SCRIPT%"
-echo     lnk.TargetPath = "%FINAL_EXE_PATH%" >> "%VBS_SCRIPT%"
-echo     lnk.WorkingDirectory = "%FINAL_EXEC_DIR%" >> "%VBS_SCRIPT%"
-echo     If fso.FileExists(ico) Then lnk.IconLocation = ico ^& ",0" >> "%VBS_SCRIPT%"
-echo     lnk.Save >> "%VBS_SCRIPT%"
+echo     Set lnk1 = ws.CreateShortcut(d ^& "\Eclipse.lnk") >> "%VBS_SCRIPT%"
+echo     lnk1.TargetPath = "%FINAL_EXE_PATH%" >> "%VBS_SCRIPT%"
+echo     lnk1.WorkingDirectory = "%FINAL_EXEC_DIR%" >> "%VBS_SCRIPT%"
+echo     If fso.FileExists(ico) Then lnk1.IconLocation = ico ^& ",0" >> "%VBS_SCRIPT%"
+echo     lnk1.Save >> "%VBS_SCRIPT%"
+echo End If >> "%VBS_SCRIPT%"
+echo. >> "%VBS_SCRIPT%"
+echo Rem 2. Create Start Menu Root Shortcut >> "%VBS_SCRIPT%"
+echo sm = ws.SpecialFolders("StartMenu") >> "%VBS_SCRIPT%"
+echo If fso.FolderExists(sm) Then >> "%VBS_SCRIPT%"
+echo     Set lnk2 = ws.CreateShortcut(sm ^& "\Eclipse.lnk") >> "%VBS_SCRIPT%"
+echo     lnk2.TargetPath = "%FINAL_EXE_PATH%" >> "%VBS_SCRIPT%"
+echo     lnk2.WorkingDirectory = "%FINAL_EXEC_DIR%" >> "%VBS_SCRIPT%"
+echo     If fso.FileExists(ico) Then lnk2.IconLocation = ico ^& ",0" >> "%VBS_SCRIPT%"
+echo     lnk2.Save >> "%VBS_SCRIPT%"
+echo End If >> "%VBS_SCRIPT%"
+echo. >> "%VBS_SCRIPT%"
+echo Rem 3. Create Programs Folder Shortcut >> "%VBS_SCRIPT%"
+echo p = ws.SpecialFolders("Programs") >> "%VBS_SCRIPT%"
+echo If fso.FolderExists(p) Then >> "%VBS_SCRIPT%"
+echo     Set lnk3 = ws.CreateShortcut(p ^& "\Eclipse.lnk") >> "%VBS_SCRIPT%"
+echo     lnk3.TargetPath = "%FINAL_EXE_PATH%" >> "%VBS_SCRIPT%"
+echo     lnk3.WorkingDirectory = "%FINAL_EXEC_DIR%" >> "%VBS_SCRIPT%"
+echo     If fso.FileExists(ico) Then lnk3.IconLocation = ico ^& ",0" >> "%VBS_SCRIPT%"
+echo     lnk3.Save >> "%VBS_SCRIPT%"
 echo End If >> "%VBS_SCRIPT%"
 
 cscript //nologo "%VBS_SCRIPT%" >nul 2>&1
 if exist "%VBS_SCRIPT%" del /f /q "%VBS_SCRIPT%" >nul 2>&1
-
 :: =========================================================================
 :: WINDOWS REGISTRATION & ADD/REMOVE PROGRAMS SEEDING
 :: =========================================================================
