@@ -129,33 +129,19 @@ function Get-FreshScript {
         return $false
     }
 }
-
 # --- Check Installation Status ---
 $isInstalled  = $false
 $dc2urlSource = $null
 $dc2urlRoot   = $null
 
-try {
-    $processInfo = [System.Diagnostics.ProcessStartInfo]::new()
-    $processInfo.FileName = "where.exe"
-    $processInfo.Arguments = "dc2url"
-    $processInfo.RedirectStandardOutput = $true
-    $processInfo.RedirectStandardError = $true
-    $processInfo.UseShellExecute = $false
-    
-    $process = [System.Diagnostics.Process]::Start($processInfo)
-    $stdout  = $process.StandardOutput.ReadToEnd()
-    $process.WaitForExit()
-
-    if ($process.ExitCode -eq 0 -and -not [string]::IsNullOrWhiteSpace($stdout)) {
-        $lines = $stdout -split "`r?`n" | Where-Object { -not [string]::IsNullOrWhiteSpace($_) -and $_ -notmatch '^INFO:' }
-        if ($lines.Count -gt 0) {
-            $dc2urlSource = $lines[0].Trim()
-            $isInstalled  = $true
-        }
+# Exclusively check PATH entries for dc2url.exe
+$env:PATH -split ';' | Where-Object { -not [string]::IsNullOrWhiteSpace($_) } | ForEach-Object {
+    $cleanPath = $_.Trim('"').Trim()
+    $candidateExe = Join-Path $cleanPath "dc2url.exe"
+    if (Test-Path $candidateExe) {
+        $dc2urlSource = $candidateExe
+        $isInstalled = $true
     }
-} catch {
-    $isInstalled = $false
 }
 
 if ($isInstalled) {
@@ -176,7 +162,7 @@ if ($isInstalled) {
     Write-Host "    [1] Install/Reinstall Eclipse (Fresh setup)"    -ForegroundColor White
     Write-Host "    [2] Reinstall dc2URL (Fresh launcher)" -ForegroundColor White
     Write-Host "    [3] Purge dc2url/ECLIPSE (Use Windows add/remove First!)"       -ForegroundColor White
-    Write-Host "    [4] Exit"                                     -ForegroundColor White
+    Write-Host "    [4] Exit"                                    -ForegroundColor White
     Write-Host ""
     
     $rawInput = Read-Host "  [AVIS INPUT] Enter selection [1-4]"
@@ -261,7 +247,7 @@ if ($isInstalled) {
 }
 
 # Initial installation path when dc2url is not detected
-Write-Header -StatusText "  [Mercwar AI] Contacting server for fresh installer..."
+Write-Header -StatusText "  [Mercwar AI] Contacting server for installer..."
 
 $TempInstaller = Join-Path $env:TEMP "dc2_install_$( [Guid]::NewGuid().ToString().Substring(0, 8) ).bat"
 if (-not (Get-FreshScript -FileName $LauncherFile -DestinationPath $TempInstaller)) {
