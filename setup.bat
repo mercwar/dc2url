@@ -15,7 +15,7 @@ setlocal EnableDelayedExpansion
 :: DIRECTORY RESOLUTION MAPPING & CONFIG.JSON VERSION DISCOVERY
 :: =========================================================================
 set "ROOT_DIR=%~dp0"
-set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/main"
+set "CONFIG_URL=https://raw.githubusercontent.com/mercwar/dc2url/main/config.json"
 set "TEMP_CONFIG=%TEMP%\dc2url_config.json"
 
 for /f %%a in ('echo prompt $E^|cmd') do set "E=%%a"
@@ -26,6 +26,7 @@ set "O2=%E%[38;2;255;110;0m"
 set "O3=%E%[38;2;255;153;0m"
 set "Y1=%E%[38;2;255;200;0m"
 set "Y2=%E%[38;2;255;235;0m"
+set "G2=%E%[38;2;80;235;155m"
 set "TXT=%E%[38;2;240;240;240m"
 
 cls
@@ -33,18 +34,18 @@ echo %BG_GLASS%
 cls
 echo.
 echo. 
-echo  %O2%  [Eclipse] Downloading current version, please wait..%RESET%%BG_GLASS%
+echo  %G2%  [Eclipse] Downloading current version, please wait..%RESET%%BG_GLASS%
 
 if exist "%TEMP_CONFIG%" del /f /q "%TEMP_CONFIG%" >nul 2>&1
 dc2url -l "%CONFIG_URL%" -nojs -o "%TEMP_CONFIG%"
 
-set "VERSION_TAG=v1.0"
+set "VERSION_TAG=v1.1"
 if exist "%TEMP_CONFIG%" (
-    for /f "delims=" %%v in ('powershell -Command "$json = Get-Content '%TEMP_CONFIG%' -Raw | ConvertFrom-Json; if($json.version) { Write-Output $json.version }" 2^>nul') do (
+    for /f "delims=" %%v in ('powershell -NoProfile -Command "$p = $env:TEMP + [IO.Path]::DirectorySeparatorChar + 'dc2url_config.json'; if(Test-Path $p){ $j = Get-Content $p -Raw | ConvertFrom-Json; if($j.version){ Write-Output $j.version } }" 2^>nul') do (
         set "VERSION_TAG=%%v"
     )
     del /f /q "%TEMP_CONFIG%" >nul 2>&1
-)
+)       
 
 echo [+] Discovered Version Path Mapping: %VERSION_TAG% 
 
@@ -52,8 +53,9 @@ set "TARGET=%ProgramFiles%\dc2url"
 set "TARGET_BASE=%TARGET%\%VERSION_TAG%"
 set "FINAL_EXEC_DIR=%TARGET_BASE%\exec"
 set "FINAL_EXE_PATH=%FINAL_EXEC_DIR%\eclipse.exe"
-set "DOWNLOAD_URL=https://mercwar01.byethost3.com/darkcom2/downlink.php?file=/eclipse/menu.json"
-set "MENU_URL=https://mercwar01.byethost3.com/darkcom2/downlink.php?file=/eclipse/eclipse.exe"
+
+set "ZIP_URL=https://mercwar01.byethost3.com/darkcom2/downlink/eclipse/eclipse.zip"
+set "MENU_URL=https://mercwar01.byethost3.com/darkcom2/downlink/eclipse/menu.json"
 
 if not exist "%TARGET%" mkdir "%TARGET%"
 if not exist "%TARGET_BASE%" mkdir "%TARGET_BASE%"
@@ -72,7 +74,14 @@ reg add "HKCU\Console" /v VirtualTerminalLevel /t REG_DWORD /d 1 /f >nul 2>&1
 cls
 echo %BG_GLASS%
 cls
-
+echo.
+echo %O1%        ███████╗ ██████╗██╗    ██║██████╗ ███████╗███████╗%RESET%%BG_GLASS%
+echo %O2%        ██╔════╝██╔════╝██║    ██║██╔══██╗██╔════╝██╔════╝%RESET%%BG_GLASS%
+echo %O3%        █████╗  ██║     ██║    ██║██████╔╝███████╗█████╗  %RESET%%BG_GLASS%
+echo %Y1%        ██╔══╝  ██║     ██║    ██║██╔═══╝ ╚════██║██╔══╝  %RESET%%BG_GLASS%
+echo %Y2%        ███████╗╚██████╗███████╗██║██║     ███████║███████╗%RESET%%BG_GLASS%
+echo %Y2%        ╚══════╝ ╚═════╝╚══════╝╚═╝╚═╝     ╚══════╝╚══════╝%RESET%%BG_GLASS%
+echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo.
 echo %O2%    ====================================================================================%RESET%%BG_GLASS%
 echo %Y2%                        Eclipse Ecosystem Installer :: Version %VERSION_TAG%%RESET%%BG_GLASS%
@@ -84,18 +93,66 @@ echo %O2%    [*] Granting write permissions to target directories...%RESET%
 icacls "%TARGET%" /grant Users:(OI)(CI)F /t >nul 2>&1
 
 :: =========================================================================
-:: DOWNLINK ACQUISITION VIA DC2URL (-nojs Fast Path)
+:: DOWNLINK ACQUISITION VIA DC2URL WITH INTEGRITY CHECK
 :: =========================================================================
 echo %O2%    [*] Checking for active instances of eclipse.exe...%RESET%
 taskkill /f /im eclipse.exe >nul 2>&1
 
-echo %O2%    [*] Acquiring eclipse.exe and menu.json via dc2url downlink engine...%RESET%
-if exist "%FINAL_EXE_PATH%" del /f /q "%FINAL_EXE_PATH%" >nul 2>&1
+echo %O2%    [*] Downloading eclipse.zip via dc2url...%RESET%
+if exist "%FINAL_EXEC_DIR%\eclipse.zip" del /f /q "%FINAL_EXEC_DIR%\eclipse.zip" >nul 2>&1
 
-dc2url -l "%DOWNLOAD_URL%" -o "%FINAL_EXE_PATH%"
+dc2url -l "%ZIP_URL%" -o "%FINAL_EXEC_DIR%\eclipse.zip"
+
+if not exist "%FINAL_EXEC_DIR%\eclipse.zip" (
+    echo [!] Error: eclipse.zip failed to download entirely.
+    goto :error
+)
+
+for %%I in ("%FINAL_EXEC_DIR%\eclipse.zip") do set "ZIP_SIZE=%%~zI"
+
+echo %O2%    [*] Decompressing archive (Size: !ZIP_SIZE! bytes)...%RESET%
+:: FIXED: Switched to native Expand-Archive cmdlet to avoid .NET method signature/encoding cast errors
+powershell -NoProfile -Command "try { Expand-Archive -Path '%FINAL_EXEC_DIR%\eclipse.zip' -DestinationPath '%FINAL_EXEC_DIR%' -Force } catch { Write-Error $_; exit 1 }"
+if %errorlevel% neq 0 (
+    echo [!] Extraction failed. Zip archive structure may be corrupt.
+    goto :error
+)
+
+echo %O2%    [*] Expanding eclipse.cab setup container via extrac32...%RESET%
+if exist "%FINAL_EXEC_DIR%\eclipse.cab" (
+    extrac32 /Y /E "%FINAL_EXEC_DIR%\eclipse.cab" /L "%FINAL_EXEC_DIR%" >nul 2>&1
+) else (
+    echo [!] Warning: eclipse.cab not found in root. Searching nested directories...
+    for /r "%FINAL_EXEC_DIR%" %%c in (eclipse.cab) do (
+        if exist "%%c" (
+            extrac32 /Y /E "%%c" /L "%FINAL_EXEC_DIR%" >nul 2>&1
+        )
+    )
+)
+
+:: =========================================================================
+:: VERIFY & LOCATE ECLIPSE.EXE (Fallback Finder)
+:: =========================================================================
+if not exist "%FINAL_EXE_PATH%" (
+    echo [!] Warning: eclipse.exe not found directly in root. Scanning directory tree...
+    for /r "%FINAL_EXEC_DIR%" %%f in (*.exe) do (
+        if /i "%%~nxf" neq "dc2url.exe" (
+            echo [+] Found executable: %%f
+            copy /y "%%f" "%FINAL_EXE_PATH%" >nul 2>&1
+        )
+    )
+)
+
+if not exist "%FINAL_EXE_PATH%" (
+    echo [!] CRITICAL ERROR: eclipse.exe could not be located or extracted from CAB/ZIP!
+    echo Listing contents of execution directory for diagnosis:
+    dir "%FINAL_EXEC_DIR%"
+    goto :error
+)
 
 if not exist "%FINAL_EXEC_DIR%\menu.json" (
-    dc2url -l "%MENU_URL%"  -o "%FINAL_EXEC_DIR%\menu.json"
+    echo %O2%    [*] Acquiring menu.json via dc2url...%RESET%
+    dc2url -l "%MENU_URL%" -o "%FINAL_EXEC_DIR%\menu.json"
 )
 
 :: =========================================================================
@@ -109,6 +166,22 @@ if exist "%TARGET%\eclipse.ico" (
     copy /y "%ROOT_DIR%\eclipse.ico" "%TARGET%\eclipse.ico" >nul 2>&1
     copy /y "%ROOT_DIR%\eclipse.ico" "%FINAL_EXEC_DIR%\eclipse.ico" >nul 2>&1
 )
+
+:: =========================================================================
+:: SHORTCUT CREATION (Desktop & Start Menu / Program Files)
+:: =========================================================================
+echo %O2%    [*] Generating Desktop and Program Files shortcuts...%RESET%
+powershell -NoProfile -Command ^
+    "$WshShell = New-Object -comObject WScript.Shell; " ^
+    "$ico = '%FINAL_EXEC_DIR%\eclipse.ico'; " ^
+    "if(!(Test-Path $ico)) { $ico = '%TARGET%\eclipse.ico' }; " ^
+    "foreach ($dest in @([Environment]::GetFolderPath('Desktop'), '%ProgramData%\Microsoft\Windows\Start Menu\Programs')) { " ^
+    "  $lnk = $WshShell.CreateShortcut(\"$dest\Eclipse.lnk\"); " ^
+    "  $lnk.TargetPath = '%FINAL_EXE_PATH%'; " ^
+    "  $lnk.WorkingDirectory = '%FINAL_EXEC_DIR%'; " ^
+    "  if(Test-Path $ico) { $lnk.IconLocation = \"$ico,0\" }; " ^
+    "  $lnk.Save(); " ^
+    "}"
 
 :: =========================================================================
 :: WINDOWS REGISTRATION & ADD/REMOVE PROGRAMS SEEDING
@@ -129,5 +202,15 @@ setx /M eclipse_path "%FINAL_EXEC_DIR%" >nul 2>&1
 
 echo.
 echo %Y2%    [SUCCESS] Eclipse %VERSION_TAG% successfully deployed and configured!%RESET%
+echo %O2%    [*] Launching eclipse.exe...%RESET%
+start "" "%FINAL_EXE_PATH%"
+echo [Eclipse] Is now running in your system icon tray.
 pause
+rem timeout /t 2 >nul
 exit /b 0
+
+:error
+echo.
+echo [!] Setup encountered a fatal error during execution.
+pause
+exit /b 1
