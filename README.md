@@ -451,7 +451,7 @@ When retrieving files from these restricted environments, `dc2url` limits operat
 
 	"You need the WebView2 turned ON for private servers and remote php web applications."
 		It isn't rocket science, dc2ws2 simply doesn't have its own javascript interpreter,
-		so we use the build it WebView2 for those sessions to take place."
+		so we use the built in WebView2 for those sessions to take place."
 
 			~ Joe Tron
 
