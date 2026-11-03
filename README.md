@@ -441,7 +441,7 @@ When retrieving files from these restricted environments, `dc2url` limits operat
 
 ### Basic Private Server Download (Silent Mode)
 
-#### NOTE: Using accidentally -dc2ws2 with your Private host, like github pages or FreeHost will result in silent failure.
+#### NOTE: Using -dc2ws2 or -nowv2 accidentally with your Private host, like github pages or FreeHost will result in silent failures.
 
 ```
 	"dc2ws2 is a socket extension , it does not validate private hosting
