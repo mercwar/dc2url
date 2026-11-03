@@ -441,6 +441,16 @@ When retrieving files from these restricted environments, `dc2url` limits operat
 
 ### Basic Private Server Download (Silent Mode)
 
+#### NOTE: Using accidentally -dc2ws2 with your Private host, like github pages or FreeHost will result in silent failure.
+
+```
+Joe Tron Says's...
+
+		" dc2ws2 is a socket extension , it does not validate private hosting security, notice the below example uses the dc2url DarkComHeadless.dll
+		To contact the remote server safely via Microsoft WebView2. To use this lib, do not specify dc2ws1 and nowv2 ( -dc2ws1 and -nowv2 turn OFF the WebView2)
+		You need the WebView2 turned ON for private servers and remote php web applications."
+```
+
 ```cmd
 dc2url -s "http://mercwar01.byethost3.com/darkcom2/downlink/eclipse/eclipse.zip" -o "eclipse.zip"
 
