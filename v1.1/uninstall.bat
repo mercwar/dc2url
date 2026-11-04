@@ -55,6 +55,7 @@ echo %O2%    ===================================================================
 echo %Y2%                        dc2url Core Cyborg Ecosystem Uninstaller%RESET%
 echo %O2%    ====================================================================================%RESET%
 echo.
+echo.
 echo %O2%        [*] Terminating active dc2url and WebView2 processes...%RESET%
 taskkill /f /im dc2url.exe >nul 2>&1
 taskkill /f /im darkcom2.exe >nul 2>&1
@@ -93,7 +94,8 @@ reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /f /reg:64 >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /f >nul 2>&1
-reg delete "HKCU\Software\dc2url" /f /s >nul 2>&1
+:: FIXED: Removed invalid /s switch from reg delete
+reg delete "HKCU\Software\dc2url" /f >nul 2>&1
 
 echo %O2%        [*] Purging Environment Variable PATH entries and registry keys...%RESET%
 reg delete "HKCU\Environment" /v "dc2url" /f >nul 2>&1
@@ -116,6 +118,9 @@ if exist "%FINAL_EXEC_DIR%\dc2url.bat" del /f /q "%FINAL_EXEC_DIR%\dc2url.bat" >
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" del /f /q "%FINAL_EXEC_DIR%\dc2ws2.dll" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" del /f /q "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
+
+:: Drop the empty exec directory entirely if it's left behind
+if exist "%FINAL_EXEC_DIR%" rmdir /s /q "%FINAL_EXEC_DIR%" >nul 2>&1
 
 :: CRITICAL LEFTOVER ICON CLEANUP
 if exist "%BASE_DIR%\favi-con.ico" del /f /q "%BASE_DIR%\favi-con.ico" >nul 2>&1
