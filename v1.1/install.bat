@@ -130,11 +130,11 @@ echo %O2%        [*] Auto Registration...%RESET%
 :: 1. Check for Administrative Privileges before writing to HKLM
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo [INFO] Running in standard user context. Skipping HKLM registration...
+    echo %O2%[INFO] Running in standard user context. Skipping HKLM registration...%RESET%
     goto :REGISTER_HKCU
 )
 
-echo [*] Auto Registering dc2url into HKLM Apps ...
+echo %O2%[*] Auto Registering dc2url into HKLM Apps ...%RESET%
 for %%K in (
     "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 ) do (
@@ -150,7 +150,7 @@ for %%K in (
 )
 
 :REGISTER_HKCU
-echo [*] Auto Registering dc2url into HKCU User Apps ...
+echo %O2%[*] Auto Registering dc2url into HKCU User Apps ...%RESET%
 for %%K in (
     "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 ) do (
@@ -165,7 +165,7 @@ for %%K in (
     reg add %%K /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 )
 
-echo [SUCCESS] Registry registration sequence completed cleanly.
+echo %O2%[SUCCESS] Registry registration sequence completed cleanly.%RESET%
 
 :: ============================================================
 :: PHASE 4: ENVIRONMENT VARIABLES & NOTIFICATION PROPAGATION
