@@ -230,9 +230,11 @@ setx /M eclipse_path "%FINAL_EXEC_DIR%" >nul 2>&1
 
 echo.
 echo %Y2%    [SUCCESS] Eclipse %VERSION_TAG% successfully deployed and configured!%RESET%
-echo %O2%    [*] Launching eclipse.exe...%RESET%
+echo.
+echo %O2%        [*] Launching eclipse.exe...%RESET%
+echo.
 start "" "%FINAL_EXE_PATH%"
-echo %Y2% [Eclipse] Is now running in your system icon tray.%RESET%
+echo %Y2%            [Eclipse] Is now running in your system icon tray.%RESET%
 echo.
 echo.
 pause
