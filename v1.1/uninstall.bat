@@ -24,7 +24,7 @@ for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
 set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
 
-title InstallShield (R) Uninstaller v1.1 :: dc2url Master Deployment Engine
+title InstallShield (R) Uninstaller v1.2 :: dc2url Master Deployment Engine
 mode con: cols=120 lines=34
 
 chcp 65001 >nul 2>&1
@@ -63,24 +63,27 @@ taskkill /f /im msedgewebview2.exe >nul 2>&1
 
 echo %O2%        [*] Purging Official URI Protocol Handlers and Classes...%RESET%
 reg delete "HKCR\dc2url" /f >nul 2>&1
-reg delete "HKLM\SOFTWARE\Classes\dc2url" /f >nul 2>&1
-reg delete "HKLM\SOFTWARE\Wow6432Node\Classes\dc2url" /f >nul 2>&1
+reg delete "HKLM\SOFTWARE\Classes\dc2url" /f /reg:64 >nul 2>&1
+reg delete "HKLM\SOFTWARE\Classes\dc2url" /f /reg:32 >nul 2>&1
+reg delete "HKLM\SOFTWARE\Wow6432Node\Classes\dc2url" /f /reg:64 >nul 2>&1
 
-echo %O2%        [*] Removing Windows Registry App Paths and Uninstaller Keys...%RESET%
-:: Comprehensive aggressive registry sweep across HKLM and HKCU views
-reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
-reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+echo %O2%        [*] Purging Add/Remove Programs and App Paths entries (64-bit / 32-bit views)...%RESET%
+:: Explicit architecture-targeted registry deletions to guarantee uninstaller list removal
+reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:64 >nul 2>&1
+reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:32 >nul 2>&1
+reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:64 >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 
-reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
-reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
+reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /reg:64 >nul 2>&1
+reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /reg:32 >nul 2>&1
+reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /reg:64 >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\dc2url" /f /s >nul 2>&1
 
 echo %O2%        [*] Purging Environment Variable PATH entries and registry keys...%RESET%
 reg delete "HKCU\Environment" /v "dc2url" /f >nul 2>&1
 reg delete "HKCU\Environment" /v "dc2url_path" /f >nul 2>&1
-reg delete "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v "dc2url_path" /f >nul 2>&1
+reg delete "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v "dc2url_path" /f /reg:64 >nul 2>&1
 
 :: Aggressive PowerShell PATH cleanup removing any substring matching dc2url or execution directories
 powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; foreach($hive in @('Machine','User')){ $m=[System.Environment]::GetEnvironmentVariable('PATH',$hive) -split ';' | Where-Object {$_ -ne ''}; $arr = $m | Where-Object {$_ -notmatch 'dc2url'}; [System.Environment]::SetEnvironmentVariable('PATH', ($arr -join ';'), $hive) }" >nul 2>&1
@@ -95,7 +98,8 @@ if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" del /f /q "%FINAL_EXEC_DIR%\dc2ws2.dll" >
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" del /f /q "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
 
-
+:: Purge local WebView2 cache generated during execution
+if exist "%TEMP%\DarkCom2_Cache" rmdir /s /q "%TEMP%\DarkCom2_Cache" >nul 2>&1
 
 echo                     [SUCCESS] dc2url components have been completely uninstalled.
 echo.
