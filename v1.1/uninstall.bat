@@ -56,8 +56,7 @@ echo %Y2%                        dc2url Core Cyborg Ecosystem Uninstaller%RESET%
 echo %O2%    ====================================================================================%RESET%
 echo.
 echo %O2%        [*] Terminating active dc2url execution processes...%RESET%
-taskkill /f /im dc2url.exe >nul 2>&1
-taskkill /f /im darkcom2.exe >nul 2>&1
+taskkill /f /im eclipse.exe >nul 2>&1
 
 echo %O2%        [*] Purging Official URI Protocol Handlers...%RESET%
 :: Remove the HKLM Classes protocol mapping explicitly forcing 64-bit view
@@ -93,7 +92,7 @@ if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" del /f /q "%FINAL_EXEC_DIR%\dc2ws2.dll" >
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" del /f /q "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
 
-echo                    [SUCCESS] dc2url components have been completely uninstalled.
+echo                     [SUCCESS] dc2url components have been completely uninstalled.
 echo.
 
 
