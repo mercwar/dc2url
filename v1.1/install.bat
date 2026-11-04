@@ -169,7 +169,7 @@ reg add "%L1%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
 reg add "%L1%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
 reg add "%L1%" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
 reg add "%L1%" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-echo %O2%        [%] 20 ...%RESET%
+echo %O2%        [1] of 5 ...%RESET%
 :: Location 2: HKLM 32-Bit / Wow6432Node
 set "L2=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 reg add "%L2%" /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
@@ -181,7 +181,7 @@ reg add "%L2%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
 reg add "%L2%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
 reg add "%L2%" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
 reg add "%L2%" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-echo %O2%        [%] 40 ...%RESET%
+echo %O2%        [2] of 5 ...%RESET%
 :INSTALL_USER_ONLY
 :: Location 3: HKCU Standard User Hive
 set "L3=HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
@@ -194,7 +194,7 @@ reg add "%L3%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
 reg add "%L3%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
 reg add "%L3%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%L3%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
-echo %O2%        [%] 60 ...%RESET%
+echo %O2%        [3 of 5 ...%RESET%
 :: Location 4: HKCU 32-Bit / Wow6432Node User Hive
 set "L4=HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 reg add "%L4%" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
@@ -206,7 +206,7 @@ reg add "%L4%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
 reg add "%L4%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
 reg add "%L4%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%L4%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
-echo %O2%        [%] 80 ...%RESET%
+echo %O2%        [4] of 5 ...%RESET%
 :: Location 5: HKCU Classes Hive
 set "L5=HKCU\Software\Classes\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 reg add "%L5%" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
@@ -218,7 +218,7 @@ reg add "%L5%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
 reg add "%L5%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
 reg add "%L5%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%L5%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
-echo %O2%        [%] 100 ...%RESET%
+echo %O2%        [5] of 5 ...%RESET%
 :finish
 echo %O2%        [COMPLETE] Deployment phase ended successfully.%RESET%
 endlocal
