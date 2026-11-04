@@ -93,7 +93,7 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
 :: Generate wrapper execution path targets
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-                        [SUCCESS] installed 'dc2url.bat' successfully.
+echo %O2%                        [SUCCESS] installed 'dc2url.bat' successfully.%RESET%
 
 :: ============================================================
 :: PHASE 3: REGISTRY SANITIZATION & PROTOCOL REGISTER
