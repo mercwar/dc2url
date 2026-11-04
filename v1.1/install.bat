@@ -224,6 +224,9 @@ echo %O2%        [5] of 5 ...%RESET%
 echo %O2%        [COMPLETE] Deployment phase ended successfully.%RESET%
 endlocal
 
+:: Broadcast the environment synchronization parameters to all active shells
+powershell -NoProfile -Command "$api = '[DllImport("user32.dll", SetLastError=true)] public static extern bool SendNotifyMessage(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam);'; $type = Add-Type -MemberDefinition $api -Name 'Win32' -Namespace 'Win32Functions' -PassThru; [Win32Functions.Win32]::SendNotifyMessage([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment') | Out-Null" >nul 2>&1
+:REGISTRY_COMPLETE
 
 set "MIDI_OUTPUT=%BASE_DIR%\sound\transformers.mid"
 if not exist "%BASE_DIR%\sound" mkdir "%BASE_DIR%\sound"
