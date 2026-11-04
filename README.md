@@ -34,8 +34,15 @@
 * **Dynamic Code-Page Protection:** Integrated UTF-8 session encoding to prevent console glyph scrambling and keep terminal output crisp.
 * **Seamless Shell Launcher Integration:** Instantly callable from `viel`, standard PowerShell, or standalone batch scripts.
 
----
+#
 
+## 🧭 AVIS-DATALAKE TUTORIAL - PUSHING RECORDS YOURSELF
+
+Explore the complete implementation guides and step-by-step tutorials for the AVIS Datalake and Starmap system:
+* [Readme : AVIS-DATALAKE TUTORIAL AND API REFERENCE](https://github.com/mercwar/AVIS-DATALAKE/blob/main/avis-datalake/README.md) — ACCESSING THE AVIS DATALAKE YOURSELF
+
+#
+	
 ## 📜 Revision History & Release Notes
 
 ### v1.1 (Current Release) - *"dc2ws2 Integration & Uplink Matrix Update"*
