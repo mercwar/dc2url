@@ -87,7 +87,6 @@ echo %O2%        [*] Cleaning up execution binaries and temporary files individu
 
 :: Safely delete individual ecosystem binaries without dropping the container directories
 if exist "%FINAL_EXEC_DIR%\dc2url.exe" del /f /q "%FINAL_EXEC_DIR%\dc2url.exe" >nul 2>&1
-if exist "%FINAL_EXEC_DIR%\darkcom2.exe" del /f /q "%FINAL_EXEC_DIR%\darkcom2.exe" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\dc2url.bat" del /f /q "%FINAL_EXEC_DIR%\dc2url.bat" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" del /f /q "%FINAL_EXEC_DIR%\dc2ws2.dll" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
@@ -95,6 +94,7 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" del /f /q "%FINAL_EXEC_DIR%\WebVi
 
 echo                    [SUCCESS] dc2url components have been completely uninstalled.
 echo.
+
 
 
 :finish
