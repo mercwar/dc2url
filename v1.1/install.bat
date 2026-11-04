@@ -64,7 +64,6 @@ echo %O2%    ===================================================================
 echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%
 echo %O2%    ====================================================================================%RESET%
 echo.
-
 :: ============================================================
 :: PHASE 1: VALIDATION & SECURITY LAYER
 :: ============================================================
@@ -122,42 +121,78 @@ reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 
 echo %O2%        [*] Auto Registering Uninstaller Keys...%RESET%
 
-:: 1. Check for Administrative Privileges before writing to HKLM
+:: Check for Administrative Privileges before writing to HKLM hives
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo %O2%[INFO] Running in standard user context. Skipping HKLM registration...%RESET%
-    goto :REGISTER_HKCU
+    echo %O2%[INFO] Running in standard user context. Populating User-Space Hives only...%RESET%
+    goto :INSTALL_USER_ONLY
 )
 
-echo %O2%        [*] Auto Registering dc2url into HKLM Apps ...%RESET%
-set "KEY_HKLM=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-reg add "%KEY_HKLM%" /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
-reg add "%KEY_HKLM%" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f /reg:64 >nul 2>&1
-reg add "%KEY_HKLM%" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f /reg:64 >nul 2>&1
-reg add "%KEY_HKLM%" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f /reg:64 >nul 2>&1
-reg add "%KEY_HKLM%" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f /reg:64 >nul 2>&1
-reg add "%KEY_HKLM%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
-reg add "%KEY_HKLM%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
-reg add "%KEY_HKLM%" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-reg add "%KEY_HKLM%" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-goto :REGISTRY_COMPLETE
+echo %O2%        [*] Auto Registering dc2url into all 5 Registry Architecture Locations...%RESET%
 
-:REGISTER_HKCU
-echo %O2%        [*] Auto Registering dc2url into HKCU User Apps (Corrected Path) ...%RESET%
-set "KEY_HKCU=HKCU\Software\Classes\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-reg add "%KEY_HKCU%" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
-reg add "%KEY_HKCU%" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f >nul 2>&1
-reg add "%KEY_HKCU%" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f >nul 2>&1
-reg add "%KEY_HKCU%" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f >nul 2>&1
-reg add "%KEY_HKCU%" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f >nul 2>&1
-reg add "%KEY_HKCU%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
-reg add "%KEY_HKCU%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
-reg add "%KEY_HKCU%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
-reg add "%KEY_HKCU%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
+:: Location 1: HKLM 64-Bit Native
+set "L1=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+reg add "%L1%" /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
+reg add "%L1%" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f /reg:64 >nul 2>&1
+reg add "%L1%" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f /reg:64 >nul 2>&1
+reg add "%L1%" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f /reg:64 >nul 2>&1
+reg add "%L1%" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f /reg:64 >nul 2>&1
+reg add "%L1%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
+reg add "%L1%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
+reg add "%L1%" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+reg add "%L1%" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+
+:: Location 2: HKLM 32-Bit / Wow6432Node
+set "L2=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+reg add "%L2%" /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
+reg add "%L2%" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f /reg:64 >nul 2>&1
+reg add "%L2%" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f /reg:64 >nul 2>&1
+reg add "%L2%" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f /reg:64 >nul 2>&1
+reg add "%L2%" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f /reg:64 >nul 2>&1
+reg add "%L2%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
+reg add "%L2%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
+reg add "%L2%" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+reg add "%L2%" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+
+:INSTALL_USER_ONLY
+:: Location 3: HKCU Standard User Hive
+set "L3=HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+reg add "%L3%" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
+reg add "%L3%" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f >nul 2>&1
+reg add "%L3%" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f >nul 2>&1
+reg add "%L3%" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f >nul 2>&1
+reg add "%L3%" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f >nul 2>&1
+reg add "%L3%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
+reg add "%L3%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
+reg add "%L3%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "%L3%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: Location 4: HKCU 32-Bit / Wow6432Node User Hive
+set "L4=HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+reg add "%L4%" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
+reg add "%L4%" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f >nul 2>&1
+reg add "%L4%" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f >nul 2>&1
+reg add "%L4%" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f >nul 2>&1
+reg add "%L4%" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f >nul 2>&1
+reg add "%L4%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
+reg add "%L4%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
+reg add "%L4%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "%L4%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
+
+:: Location 5: HKCU Classes Hive
+set "L5=HKCU\Software\Classes\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+reg add "%L5%" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
+reg add "%L5%" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f >nul 2>&1
+reg add "%L5%" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f >nul 2>&1
+reg add "%L5%" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f >nul 2>&1
+reg add "%L5%" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f >nul 2>&1
+reg add "%L5%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
+reg add "%L5%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
+reg add "%L5%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "%L5%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 
 :REGISTRY_COMPLETE
 echo %O2%                [SUCCESS] Registry registration sequence completed cleanly.%RESET%
-
 
 :: ============================================================
 :: PHASE 4: ENVIRONMENT VARIABLES & NOTIFICATION PROPAGATION
