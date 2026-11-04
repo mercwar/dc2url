@@ -123,36 +123,49 @@ reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 
 echo %O2%        [*] Auto Registering dc2url into Windows Installed Apps...%RESET%
 
-:: Flattened Loop Targets to Prevent Syntax Breaks
-for %%K in (
-    "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-    "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-) do (
-    reg add "%%~K" /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
-    reg add "%%~K" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f /reg:64 >nul 2>&1
-    reg add "%%~K" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" /f /reg:64 >nul 2>&1
-    reg add "%%~K" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f /reg:64 >nul 2>&1
-    reg add "%%~K" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f /reg:64 >nul 2>&1
-    reg add "%%~K" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
-    reg add "%%~K" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
-    reg add "%%~K" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-    reg add "%%~K" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+:: ============================================================================
+:: ROBUST REGISTRY INSTALLER BLOCK FOR DC2URL
+:: ============================================================================
+
+:: 1. Check for Administrative Privileges before writing to HKLM
+net session >nul 2>&1
+if %errorlevel% neq 0 (
+    echo [INFO] Running in standard user context. Skipping HKLM registration...
+    goto :REGISTER_HKCU
 )
 
+echo [*] Auto Registering dc2url into HKLM Apps Hive...
+for %%K in (
+    "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+) do (
+    reg add %%K /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
+    reg add %%K /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f /reg:64 >nul 2>&1
+    reg add %%K /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f /reg:64 >nul 2>&1
+    reg add %%K /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f /reg:64 >nul 2>&1
+    reg add %%K /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f /reg:64 >nul 2>&1
+    reg add %%K /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
+    reg add %%K /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
+    reg add %%K /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+    reg add %%K /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+)
+
+:REGISTER_HKCU
+echo [*] Auto Registering dc2url into HKCU User Apps Hive...
 for %%K in (
     "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-    "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 ) do (
-    reg add "%%~K" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
-    reg add "%%~K" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f >nul 2>&1
-    reg add "%%~K" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" /f >nul 2>&1
-    reg add "%%~K" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f >nul 2>&1
-    reg add "%%~K" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f >nul 2>&1
-    reg add "%%~K" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
-    reg add "%%~K" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
-    reg add "%%~K" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
-    reg add "%%~K" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
+    reg add %%K /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
+    reg add %%K /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f >nul 2>&1
+    reg add %%K /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f >nul 2>&1
+    reg add %%K /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f >nul 2>&1
+    reg add %%K /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f >nul 2>&1
+    reg add %%K /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
+    reg add %%K /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
+    reg add %%K /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
+    reg add %%K /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 )
+
+echo [SUCCESS] Registry registration sequence completed cleanly.
 
 :: ============================================================
 :: PHASE 4: ENVIRONMENT VARIABLES & NOTIFICATION PROPAGATION
