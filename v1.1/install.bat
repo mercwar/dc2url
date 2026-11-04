@@ -111,19 +111,19 @@ echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%
 reg add "HKCU\Software\dc2url\Launcher" /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
 reg add "HKCU\Software\dc2url\Launcher" /v "NetworkSubsystem" /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2ws2.dll" /f >nul 2>&1
 reg add "HKCU\Software\dc2url\Launcher" /v "HeadlessEngine" /t REG_SZ /d "%FINAL_EXEC_DIR%\DarkComHeadless.dll" /f >nul 2>&1
-
+echo %O2%        [*] Auto Configuring dc2url for Windows Shell...%RESET%
 :: Global Native Redirections (.EXE Shell / Run Dialog Integration)
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
-
+echo %O2%        [*] Auto Configuring dc2url for Windows DOS Batch...%RESET%
 :: Global Native Redirections (.BAT Shell / Core DOS Batch Interceptor Integration)
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /ve /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2url.bat" /f /reg:64 >nul 2>&1
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /ve /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2url.bat" /f >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
-
+echo %O2%        [*] Auto Configuring dc2url for Windows SysWOW64...%RESET%
 :: SysWOW64 Redundancy Safety Layers
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
