@@ -16,6 +16,14 @@
 
 ###
 
+## 🧭 AVIS-DATALAKE TUTORIAL - PUSHING RECORDS YOURSELF
+
+Explore the complete implementation guides and step-by-step tutorials for the AVIS Datalake and Starmap system:
+* [Readme : AVIS-DATALAKE TUTORIAL AND API REFERENCE](https://github.com/mercwar/AVIS-DATALAKE/blob/main/avis-datalake/README.md) — ACCESSING THE AVIS DATALAKE YOURSELF
+    
+
+###
+
 ##  🌈 dc2ws2 Performance  
 ![dc24](images/dc2ws2.jpg)
 
@@ -36,13 +44,7 @@
 
 #
 
-## 🧭 AVIS-DATALAKE TUTORIAL - PUSHING RECORDS YOURSELF
 
-Explore the complete implementation guides and step-by-step tutorials for the AVIS Datalake and Starmap system:
-* [Readme : AVIS-DATALAKE TUTORIAL AND API REFERENCE](https://github.com/mercwar/AVIS-DATALAKE/blob/main/avis-datalake/README.md) — ACCESSING THE AVIS DATALAKE YOURSELF
-
-#
-	
 ## 📜 Revision History & Release Notes
 
 ### v1.1 (Current Release) - *"dc2ws2 Integration & Uplink Matrix Update"*
