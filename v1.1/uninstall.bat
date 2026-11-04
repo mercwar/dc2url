@@ -86,10 +86,13 @@ reg delete "HKCU\Software\Classes\Software\Microsoft\Windows\CurrentVersion\Unin
 :: Clean up secondary architecture fallbacks
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:32 >nul 2>&1
 
+:: PURGING DOS / APPPATH EXECUTION INTERCEPTORS
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /reg:64 >nul 2>&1
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /reg:32 >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /reg:64 >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
+reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /f /reg:64 >nul 2>&1
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /f >nul 2>&1
 reg delete "HKCU\Software\dc2url" /f /s >nul 2>&1
 
 echo %O2%        [*] Purging Environment Variable PATH entries and registry keys...%RESET%
@@ -100,8 +103,12 @@ reg delete "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /
 :: Aggressive PowerShell PATH cleanup removing any substring matching dc2url or execution directories
 powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; foreach($hive in @('Machine','User')){ $m=[System.Environment]::GetEnvironmentVariable('PATH',$hive) -split ';' | Where-Object {$_ -ne ''}; $arr = $m | Where-Object {$_ -notmatch 'dc2url'}; [System.Environment]::SetEnvironmentVariable('PATH', ($arr -join ';'), $hive) }" >nul 2>&1
 
+echo %O2%        [*] Broadcasting shell changes to Windows for immediate effect...%RESET%
 :: Global environment update notification broadcast
 powershell -NoProfile -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
+
+:: Immediate Windows Shell View Flush and Icon Refresh
+powershell -NoProfile -Command "$code = '[DllImport(\"shell32.dll\")] public static extern void SHChangeNotify(int wEventId, uint uFlags, IntPtr dwItem1, IntPtr dwItem2);'; Add-Type -MemberDefinition $code -Name Shell -Namespace Win32; [Win32.Shell]::SHChangeNotify(0x08000000, 0, [IntPtr]::Zero, [IntPtr]::Zero);" >nul 2>&1
 
 echo %O2%        [*] Cleaning up execution binaries, DLLs, and temporary cache folders...%RESET%
 if exist "%FINAL_EXEC_DIR%\dc2url.exe" del /f /q "%FINAL_EXEC_DIR%\dc2url.exe" >nul 2>&1
@@ -110,9 +117,12 @@ if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" del /f /q "%FINAL_EXEC_DIR%\dc2ws2.dll" >
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" del /f /q "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
 
+:: CRITICAL LEFTOVER ICON CLEANUP
+if exist "%BASE_DIR%\favi-con.ico" del /f /q "%BASE_DIR%\favi-con.ico" >nul 2>&1
 
 echo                     [SUCCESS] dc2url components have been completely uninstalled.
 echo.
+
 
 
 
