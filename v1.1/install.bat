@@ -130,37 +130,34 @@ if %errorlevel% neq 0 (
 )
 
 echo %O2%        [*] Auto Registering dc2url into HKLM Apps ...%RESET%
-for %%K in (
-    "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-) do (
-    reg add %%K /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
-    reg add %%K /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f /reg:64 >nul 2>&1
-    reg add %%K /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f /reg:64 >nul 2>&1
-    reg add %%K /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f /reg:64 >nul 2>&1
-    reg add %%K /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f /reg:64 >nul 2>&1
-    reg add %%K /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
-    reg add %%K /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
-    reg add %%K /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-    reg add %%K /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-)
+set "KEY_HKLM=HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+reg add "%KEY_HKLM%" /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
+reg add "%KEY_HKLM%" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f /reg:64 >nul 2>&1
+reg add "%KEY_HKLM%" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f /reg:64 >nul 2>&1
+reg add "%KEY_HKLM%" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f /reg:64 >nul 2>&1
+reg add "%KEY_HKLM%" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f /reg:64 >nul 2>&1
+reg add "%KEY_HKLM%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
+reg add "%KEY_HKLM%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
+reg add "%KEY_HKLM%" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+reg add "%KEY_HKLM%" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+goto :REGISTRY_COMPLETE
 
 :REGISTER_HKCU
-echo %O2%        [*] Auto Registering dc2url into HKCU User Apps ...%RESET%
-for %%K in (
-    "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
-) do (
-    reg add %%K /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
-    reg add %%K /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f >nul 2>&1
-    reg add %%K /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f >nul 2>&1
-    reg add %%K /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f >nul 2>&1
-    reg add %%K /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f >nul 2>&1
-    reg add %%K /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
-    reg add %%K /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
-    reg add %%K /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
-    reg add %%K /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
-)
+echo %O2%        [*] Auto Registering dc2url into HKCU User Apps (Corrected Path) ...%RESET%
+set "KEY_HKCU=HKCU\Software\Classes\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+reg add "%KEY_HKCU%" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
+reg add "%KEY_HKCU%" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f >nul 2>&1
+reg add "%KEY_HKCU%" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\\" /f >nul 2>&1
+reg add "%KEY_HKCU%" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f >nul 2>&1
+reg add "%KEY_HKCU%" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f >nul 2>&1
+reg add "%KEY_HKCU%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
+reg add "%KEY_HKCU%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
+reg add "%KEY_HKCU%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
+reg add "%KEY_HKCU%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 
+:REGISTRY_COMPLETE
 echo %O2%                [SUCCESS] Registry registration sequence completed cleanly.%RESET%
+
 
 :: ============================================================
 :: PHASE 4: ENVIRONMENT VARIABLES & NOTIFICATION PROPAGATION
