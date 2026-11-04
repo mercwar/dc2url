@@ -64,15 +64,20 @@ echo %O2%    ===================================================================
 echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%
 echo %O2%    ====================================================================================%RESET%
 echo.
-
-echo %O2%        [*] Granting full write access permissions to %VERSION_DIR%...%RESET%
-icacls "%VERSION_DIR%" /grant Users:(OI)(CI)F /t >nul 2>&1
-
+:: ============================================================
+:: PHASE 1: VALIDATION & SECURITY LAYER
+:: ============================================================
 if not exist "%FINAL_EXE_PATH%" (
     echo %O1%        [AVIS FAILED] Execution binaries are missing in: %FINAL_EXEC_DIR%%RESET%
     goto :finish
 )
 
+echo %O2%        [*] Granting full write access permissions to %VERSION_DIR%...%RESET%
+icacls "%VERSION_DIR%" /grant Users:(OI)(CI)F /t >nul 2>&1
+
+:: ============================================================
+:: PHASE 2: SUBSYSTEM & RUNTIME CODES VERIFICATION
+:: ============================================================
 echo %O2%        [*] Processing OLE/COM and System DLL Registrations...%RESET%
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
     echo                    [SUCCESS] dc2ws2.dll network subsystem ready.
@@ -84,60 +89,67 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
     echo                    [SUCCESS] WebView2Loader.dll ready.
 )
 
+:: Generate wrapper execution path targets
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
 echo                    [SUCCESS] installed 'dc2url.bat' successfully.
 
+:: ============================================================
+:: PHASE 3: REGISTRY SANITIZATION & PROTOCOL REGISTER
+:: ============================================================
 echo %O2%        [*] Purging Legacy Local App Registry Conflicts...%RESET%
-:: Remove the fake or cached configurations before setting the new official targets
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 
+echo %O2%        [*] Registering Official URI Protocol Handler...%RESET%
+reg add "HKLM\SOFTWARE\Classes\dc2url" /ve /t REG_SZ /d "URL:dc2url Protocol" /f /reg:64 >nul 2>&1
+reg add "HKLM\SOFTWARE\Classes\dc2url" /v "URL Protocol" /t REG_SZ /d "" /f /reg:64 >nul 2>&1
+reg add "HKLM\SOFTWARE\Classes\dc2url\shell\open\command" /ve /t REG_SZ /d "\"%FINAL_EXE_PATH%\" \"%%1\"" /f /reg:64 >nul 2>&1
+
 echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%
+reg add "HKCU\Software\dc2url\Launcher" /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
+reg add "HKCU\Software\dc2url\Launcher" /v "NetworkSubsystem" /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2ws2.dll" /f >nul 2>&1
+reg add "HKCU\Software\dc2url\Launcher" /v "HeadlessEngine" /t REG_SZ /d "%FINAL_EXEC_DIR%\DarkComHeadless.dll" /f >nul 2>&1
 
-reg add "HKCU\Software\dc2url\Launcher" /f /v "InstallPath" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
-reg add "HKCU\Software\dc2url\Launcher" /f /v "NetworkSubsystem" /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2ws2.dll" >nul 2>&1
-reg add "HKCU\Software\dc2url\Launcher" /f /v "HeadlessEngine" /t REG_SZ /d "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
+:: Global Native Redirections
+reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
+reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 
-reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
-reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
-
-reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
-reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
-reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /ve /t REG_SZ /d "%FINAL_EXE_PATH%" >nul 2>&1
-reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" >nul 2>&1
+:: SysWOW64 Redundancy Safety Layers
+reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
+reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 
 echo %O2%        [*] Auto Registering dc2url into Windows Installed Apps...%RESET%
-
 for %%H in (HKLM HKCU) do (
     for %%N in ("" "\Wow6432Node") do (
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "DisplayName" /t REG_SZ /d "dc2url" >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "Publisher" /t REG_SZ /d "Mercwar AI" >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "EstimatedSize" /t REG_DWORD /d 1024 >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f /reg:64 >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" /f /reg:64 >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f /reg:64 >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f /reg:64 >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
     )
 )
 
+:: ============================================================
+:: PHASE 4: ENVIRONMENT VARIABLES & NOTIFICATION PROPAGATION
+:: ============================================================
 echo %O2%        [AVIS] Saving config and completing registration...%RESET%
 
-:: Explicit tracking variables saved cleanly to the user environment context
 reg add "HKCU\Environment" /v "dc2url_path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
 reg add "HKCU\Environment" /v "dc2url" /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
 
-:: Machine PATH injection with error trapping for privilege restrictions
 powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; $m=[System.Environment]::GetEnvironmentVariable('PATH','Machine') -split ';'; if($m -notcontains '%FINAL_EXEC_DIR%' -and $m -ne ''){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$m) -join ';'),'Machine') }" >nul 2>&1
-
-:: User PATH registration to ensure persistence regardless of admin execution level
 powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; $p=[System.Environment]::GetEnvironmentVariable('PATH','User') -split ';'; if($p -notcontains '%FINAL_EXEC_DIR%' -and $p -ne ''){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$p) -join ';'),'User') }" >nul 2>&1
 
-:: Force environment propagation to sync running instances (Notepad++, consoles, wrappers)
+:: Force shell propagation broadcast
 powershell -NoProfile -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
 echo                    [SUCCESS] dc2url is now fully installed and at your command!
