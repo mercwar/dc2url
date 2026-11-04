@@ -81,19 +81,19 @@ icacls "%VERSION_DIR%" /grant Users:(OI)(CI)F /t >nul 2>&1
 :: ============================================================
 echo %O2%        [*] Processing OLE/COM and System DLL Registrations...%RESET%
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
-echo %O2%                            [SUCCESS] dc2ws2.dll network subsystem ready.%RESET%
+echo %O2%                [SUCCESS] dc2ws2.dll network subsystem ready.%RESET%
 )
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
-echo %O2%                            [SUCCESS] DarkComHeadless.dll ready.%RESET%
+echo %O2%                [SUCCESS] DarkComHeadless.dll ready.%RESET%
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
- echo %O2%                           [SUCCESS] WebView2Loader.dll ready.%RESET%
+ echo %O2%                [SUCCESS] WebView2Loader.dll ready.%RESET%
 )
 
 :: Generate wrapper execution path targets
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo %O2%                        [SUCCESS] installed 'dc2url.bat' successfully.%RESET%
+echo %O2%                [SUCCESS] installed 'dc2url.bat' successfully.%RESET%
 
 :: ============================================================
 :: PHASE 3: REGISTRY SANITIZATION & PROTOCOL REGISTER
@@ -129,7 +129,7 @@ if %errorlevel% neq 0 (
     goto :REGISTER_HKCU
 )
 
-echo %O2%[*] Auto Registering dc2url into HKLM Apps ...%RESET%
+echo %O2%        [*] Auto Registering dc2url into HKLM Apps ...%RESET%
 for %%K in (
     "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 ) do (
@@ -145,7 +145,7 @@ for %%K in (
 )
 
 :REGISTER_HKCU
-echo %O2%[*] Auto Registering dc2url into HKCU User Apps ...%RESET%
+echo %O2%        [*] Auto Registering dc2url into HKCU User Apps ...%RESET%
 for %%K in (
     "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 ) do (
@@ -160,12 +160,12 @@ for %%K in (
     reg add %%K /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 )
 
-echo %O2% [SUCCESS] Registry registration sequence completed cleanly.%RESET%
+echo %O2%                [SUCCESS] Registry registration sequence completed cleanly.%RESET%
 
 :: ============================================================
 :: PHASE 4: ENVIRONMENT VARIABLES & NOTIFICATION PROPAGATION
 :: ============================================================
-echo %O2%        [AVIS] Saving config and completing registration...%RESET%
+echo %O2%         [AVIS] Saving config and completing registration...%RESET%
 
 reg add "HKCU\Environment" /v "dc2url_path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
 reg add "HKCU\Environment" /v "dc2url" /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
@@ -178,7 +178,7 @@ echo %O2%        [*] Broadcasting environment update to Windows Shell...%RESET%
 powershell -NoProfile -InputFormat None -Command "$api = '[DllImport(\"user32.dll\", SetLastError=true)] public static extern bool SendNotifyMessage(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam);'; $type = Add-Type -MemberDefinition $api -Name 'Win32' -Namespace 'Win32Functions' -PassThru; [Win32Functions.Win32]::SendNotifyMessage([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment') | Out-Null" >nul 2>&1
 
 echo.
-echo %O2%                    [SUCCESS] dc2url is now fully installed and at your command!%RESET%
+echo %O2%                [SUCCESS] dc2url is now fully installed and at your command!%RESET%
 
 set "MIDI_OUTPUT=%BASE_DIR%\sound\transformers.mid"
 if not exist "%BASE_DIR%\sound" mkdir "%BASE_DIR%\sound"
@@ -202,45 +202,45 @@ if /i "%SOUND_SETTING%"=="on" (
         
         if !FILESIZE! LSS 1000 goto bad_file
         echo.
-        echo %Y2%        [Transformation] TRANSFORM... %RESET%
+        echo %Y2%                        [Transformation] TRANSFORM... %RESET%
         start "" "%MIDI_OUTPUT%"
         
     ) else (
         echo [AVIS ERROR] Binary download failed.
     )
 ) else (
-    echo %TXT%        [INFO] Skipping audio playback.%RESET%
+    echo %TXT%                [INFO] Skipping audio playback.%RESET%
 )
 goto finish
 
 :bad_file
-echo [AVIS FAILURE] File size is too small (!FILESIZE! bytes). Check network or proxy.
+echo         [AVIS FAILURE] File size is too small (!FILESIZE! bytes). Check network or proxy.
 
 :finish
 echo.
-echo %Y2%        [To uninstall, go to Add/Remove Programs or run uninstall.bat]%RESET%
+echo %Y2%                [To uninstall, go to Add/Remove Programs or run uninstall.bat]%RESET%
 echo.
 echo %TXT%        Your copy of dc2url in now installed cmd:\ dc2url -nojs [curl compat]...%RESET%
 echo.
 
 if not exist "%BASE_DIR%\setup.bat" goto :no_setup
 
-choice /c YN /n /m "%O2%        [?] Update/Install/Re-install Eclipse for dc2url v1.1 ? (Y/N)%RESET%"
+choice /c YN /n /m "%O2%                [?] Update/Install/Re-install Eclipse for dc2url v1.1 ? (Y/N)%RESET%"
 
 if errorlevel 2 goto :skip_setup
 if errorlevel 1 goto :run_setup
 
 :run_setup
-echo %O2%        [*] Launching local setup...%RESET%
+echo %O2%                [*] Launching local setup...%RESET%
 call "%BASE_DIR%\setup.bat"
 goto :setup_end
 
 :skip_setup
-echo %Y2%        [INFO] Exiting...%RESET%
+echo %Y2%                [INFO] Exiting...%RESET%
 goto :setup_end
 
 :no_setup
-echo %Y2%        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%
+echo %Y2%                        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%
 
 :setup_end
 echo.
