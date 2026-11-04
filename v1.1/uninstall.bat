@@ -60,6 +60,10 @@ taskkill /f /im dc2url.exe >nul 2>&1
 taskkill /f /im darkcom2.exe >nul 2>&1
 taskkill /f /im msedgewebview2.exe >nul 2>&1
 
+:: CRITICAL PATH RESOLUTION FIX
+set "SCRIPT_DIR=%~dp0"
+set "FINAL_EXEC_DIR=%SCRIPT_DIR%exec"
+
 echo %O2%        [*] Purging Official URI Protocol Handlers and Classes...%RESET%
 reg delete "HKCR\dc2url" /f >nul 2>&1
 reg delete "HKLM\SOFTWARE\Classes\dc2url" /f /reg:64 >nul 2>&1
@@ -67,11 +71,12 @@ reg delete "HKLM\SOFTWARE\Classes\dc2url" /f /reg:32 >nul 2>&1
 reg delete "HKLM\SOFTWARE\Wow6432Node\Classes\dc2url" /f /reg:64 >nul 2>&1
 
 echo %O2%        [*] Forcefully wiping Add/Remove Programs keys across all architecture hives...%RESET%
-:: Explicit architecture-targeted registry deletions for Uninstall keys matching setup.bat
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:64 >nul 2>&1
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:32 >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:64 >nul 2>&1
 reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
+:: CRITICAL UNINSTALL KEY FIX (Targets the user-space App path)
+reg delete "HKCU\Software\Classes\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f >nul 2>&1
 
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /reg:64 >nul 2>&1
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f /reg:32 >nul 2>&1
@@ -96,8 +101,6 @@ if exist "%FINAL_EXEC_DIR%\dc2url.bat" del /f /q "%FINAL_EXEC_DIR%\dc2url.bat" >
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" del /f /q "%FINAL_EXEC_DIR%\dc2ws2.dll" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" del /f /q "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
-
-
 
 echo                     [SUCCESS] dc2url components have been completely uninstalled.
 echo.
