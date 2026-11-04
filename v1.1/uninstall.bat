@@ -119,17 +119,17 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" del /f /q "%FINAL_EXEC_DIR%\WebVi
 
 :: CRITICAL LEFTOVER ICON CLEANUP
 if exist "%BASE_DIR%\favi-con.ico" del /f /q "%BASE_DIR%\favi-con.ico" >nul 2>&1
-
-echo                     [SUCCESS] dc2url components have been completely uninstalled.
+echo.
+echo              [SUCCESS] dc2url components have been completely uninstalled.
 echo.
 
 
 
 
 :finish
-echo %Y2%        [Mercwar AI] Uninstallation sequence finalized successfully.%RESET%
+echo %Y2%              [Mercwar AI] Uninstallation sequence finalized successfully.%RESET%
 echo.
-echo %Y2%        [Mercwar AI] This window will close in 3 seconds.%RESET%
+echo %Y2%              [Mercwar AI] This window will close in 3 seconds.%RESET%
 timeout /t 3 >nul
 endlocal
 exit /b 0
