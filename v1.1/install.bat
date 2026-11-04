@@ -274,7 +274,8 @@ echo.
 if not exist "%BASE_DIR%\setup.bat" goto :no_setup
 echo.
 choice /c YN /n /m "%O2%                [?] Update/Install/Re-install Eclipse for dc2url v1.1 ? (Y/N)%RESET%"
-
+echo.
+echo.
 if errorlevel 2 goto :skip_setup
 if errorlevel 1 goto :run_setup
 
