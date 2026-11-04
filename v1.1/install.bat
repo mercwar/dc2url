@@ -160,7 +160,7 @@ for %%K in (
     reg add %%K /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 )
 
-echo %O2%[SUCCESS] Registry registration sequence completed cleanly.%RESET%
+echo %O2% [SUCCESS] Registry registration sequence completed cleanly.%RESET%
 
 :: ============================================================
 :: PHASE 4: ENVIRONMENT VARIABLES & NOTIFICATION PROPAGATION
@@ -177,8 +177,8 @@ powershell -NoProfile -InputFormat None -Command "$ErrorActionPreference='Silent
 echo %O2%        [*] Broadcasting environment update to Windows Shell...%RESET%
 powershell -NoProfile -InputFormat None -Command "$api = '[DllImport(\"user32.dll\", SetLastError=true)] public static extern bool SendNotifyMessage(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam);'; $type = Add-Type -MemberDefinition $api -Name 'Win32' -Namespace 'Win32Functions' -PassThru; [Win32Functions.Win32]::SendNotifyMessage([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment') | Out-Null" >nul 2>&1
 
-                    [SUCCESS] dc2url is now fully installed and at your command!
-<br>
+echo.
+echo %O2%                    [SUCCESS] dc2url is now fully installed and at your command!%RESET%
 
 set "MIDI_OUTPUT=%BASE_DIR%\sound\transformers.mid"
 if not exist "%BASE_DIR%\sound" mkdir "%BASE_DIR%\sound"
