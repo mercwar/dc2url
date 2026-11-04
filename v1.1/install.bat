@@ -60,10 +60,14 @@ echo %Y1%        ██║  ██║██╔══██║██╔══█�
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║ ╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%
 echo.
+@echo off
+setlocal EnableDelayedExpansion
+
 echo %O2%    ====================================================================================%RESET%
 echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%
 echo %O2%    ====================================================================================%RESET%
 echo.
+
 :: ============================================================
 :: PHASE 1: VALIDATION & SECURITY LAYER
 :: ============================================================
@@ -80,16 +84,16 @@ icacls "%VERSION_DIR%" /grant Users:(OI)(CI)F /t >nul 2>&1
 :: ============================================================
 echo %O2%        [*] Processing OLE/COM and System DLL Registrations...%RESET%
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
-echo %O2%                [SUCCESS] dc2ws2.dll network subsystem ready.%RESET%
+    echo %O2%                [SUCCESS] dc2ws2.dll network subsystem ready.%RESET%
 )
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
-echo %O2%                [SUCCESS] DarkComHeadless.dll ready.%RESET%
+    echo %O2%                [SUCCESS] DarkComHeadless.dll ready.%RESET%
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
- echo %O2%                [SUCCESS] WebView2Loader.dll ready.%RESET%
+    echo %O2%                [SUCCESS] WebView2Loader.dll ready.%RESET%
 )
 
-:: Generate wrapper execution path targets
+:: Generate wrapper execution path targets for direct CLI calling
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
 echo %O2%                [SUCCESS] installed 'dc2url.bat' successfully.%RESET%
@@ -107,7 +111,7 @@ reg add "HKCU\Software\dc2url\Launcher" /v "InstallPath" /t REG_SZ /d "%FINAL_EX
 reg add "HKCU\Software\dc2url\Launcher" /v "NetworkSubsystem" /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2ws2.dll" /f >nul 2>&1
 reg add "HKCU\Software\dc2url\Launcher" /v "HeadlessEngine" /t REG_SZ /d "%FINAL_EXEC_DIR%\DarkComHeadless.dll" /f >nul 2>&1
 
-:: Global Native Redirections
+:: Global Native Redirections (Shell / Run Dialog Integration)
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
@@ -117,17 +121,41 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
-reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
 
-echo %O2%        [*] Auto Registering Uninstaller Keys...%RESET%
+:: ============================================================
+:: PHASE 4: NATIVE DOS/CLI ENVIRONMENT PATH REGISTRATION
+:: ============================================================
+echo %O2%        [*] Registering global system execution paths for cmd/PowerShell...%RESET%
 
-:: Check for Administrative Privileges before writing to HKLM hives
+:: Check for Administrative Privileges before writing system environment variables
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo %O2%[INFO] Running in standard user context. Populating User-Space Hives only...%RESET%
+    echo %O1%        [WARNING] Running in standard user context. Modifying User Path variable only...%RESET%
+    
+    :: Safely append to User PATH environment variable
+    for /f "tokens=2*" %%A in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "OLD_USER_PATH=%%B"
+    if defined OLD_USER_PATH (
+        echo !OLD_USER_PATH! | findstr /I /C:"%FINAL_EXEC_DIR%" >nul || (
+            setx PATH "!OLD_USER_PATH!;%FINAL_EXEC_DIR%" >nul
+        )
+    ) else (
+        setx PATH "%FINAL_EXEC_DIR%" >nul
+    )
     goto :INSTALL_USER_ONLY
 )
 
+:: Admin Context: Update System-Wide PATH for all users
+for /f "tokens=2*" %%A in ('reg query "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "OLD_SYS_PATH=%%B"
+if defined OLD_SYS_PATH (
+    echo !OLD_SYS_PATH! | findstr /I /C:"%FINAL_EXEC_DIR%" >nul || (
+        setx PATH "!OLD_SYS_PATH!;%FINAL_EXEC_DIR%" /m >nul
+    )
+) else (
+    setx PATH "%FINAL_EXEC_DIR%" /m >nul
+)
+
+echo %O2%        [*] Auto Registering Uninstaller Keys...%RESET%
 echo %O2%        [*] Auto Registering dc2url into all 5 Registry Architecture Locations...%RESET%
 
 :: Location 1: HKLM 64-Bit Native
@@ -191,26 +219,10 @@ reg add "%L5%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
 reg add "%L5%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%L5%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 
-:REGISTRY_COMPLETE
-echo %O2%                [SUCCESS] Registry registration sequence completed cleanly.%RESET%
+:finish
+echo %O2%        [COMPLETE] Deployment phase ended successfully.%RESET%
+endlocal
 
-:: ============================================================
-:: PHASE 4: ENVIRONMENT VARIABLES & NOTIFICATION PROPAGATION
-:: ============================================================
-echo %O2%         [AVIS] Saving config and completing registration...%RESET%
-
-reg add "HKCU\Environment" /v "dc2url_path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
-reg add "HKCU\Environment" /v "dc2url" /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
-
-:: Properly prepend FINAL_EXEC_DIR to PATH without duplicates
-powershell -NoProfile -InputFormat None -Command "$ErrorActionPreference='SilentlyContinue'; $m=[System.Environment]::GetEnvironmentVariable('PATH','Machine') -split ';' | Where-Object {$_ -ne ''}; if($m -notcontains '%FINAL_EXEC_DIR%'){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$m) -join ';'),'Machine') }" >nul 2>&1
-powershell -NoProfile -InputFormat None -Command "$ErrorActionPreference='SilentlyContinue'; $p=[System.Environment]::GetEnvironmentVariable('PATH','User') -split ';' | Where-Object {$_ -ne ''}; if($p -notcontains '%FINAL_EXEC_DIR%'){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$p) -join ';'),'User') }" >nul 2>&1
-
-echo %O2%        [*] Broadcasting environment update to Windows Shell...%RESET%
-powershell -NoProfile -InputFormat None -Command "$api = '[DllImport(\"user32.dll\", SetLastError=true)] public static extern bool SendNotifyMessage(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam);'; $type = Add-Type -MemberDefinition $api -Name 'Win32' -Namespace 'Win32Functions' -PassThru; [Win32Functions.Win32]::SendNotifyMessage([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment') | Out-Null" >nul 2>&1
-
-echo.
-echo %O2%                [SUCCESS] dc2url is now fully installed and at your command!%RESET%
 
 set "MIDI_OUTPUT=%BASE_DIR%\sound\transformers.mid"
 if not exist "%BASE_DIR%\sound" mkdir "%BASE_DIR%\sound"
