@@ -64,6 +64,7 @@ echo %O2%    ===================================================================
 echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%
 echo %O2%    ====================================================================================%RESET%
 echo.
+
 :: ============================================================
 :: PHASE 1: VALIDATION & SECURITY LAYER
 :: ============================================================
@@ -80,25 +81,23 @@ icacls "%VERSION_DIR%" /grant Users:(OI)(CI)F /t >nul 2>&1
 :: ============================================================
 echo %O2%        [*] Processing OLE/COM and System DLL Registrations...%RESET%
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
-    echo                    [SUCCESS] dc2ws2.dll network subsystem ready.
+                        [SUCCESS] dc2ws2.dll network subsystem ready.
 )
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
-    echo                    [SUCCESS] DarkComHeadless.dll ready.
+                        [SUCCESS] DarkComHeadless.dll ready.
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
-    echo                    [SUCCESS] WebView2Loader.dll ready.
+                        [SUCCESS] WebView2Loader.dll ready.
 )
 
 :: Generate wrapper execution path targets
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
-echo                    [SUCCESS] installed 'dc2url.bat' successfully.
+                        [SUCCESS] installed 'dc2url.bat' successfully.
 
 :: ============================================================
 :: PHASE 3: REGISTRY SANITIZATION & PROTOCOL REGISTER
 :: ============================================================
-
-
 echo %O2%        [*] Registering Official URI Protocol Handler...%RESET%
 reg add "HKLM\SOFTWARE\Classes\dc2url" /ve /t REG_SZ /d "URL:dc2url Protocol" /f /reg:64 >nul 2>&1
 reg add "HKLM\SOFTWARE\Classes\dc2url" /v "URL Protocol" /t REG_SZ /d "" /f /reg:64 >nul 2>&1
@@ -119,13 +118,9 @@ reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
-reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 
-echo %O2%        [*] Auto Registration...%RESET%
-
-:: ============================================================================
-:: ROBUST REGISTRY INSTALLER BLOCK FOR DC2URL
-:: ============================================================================
+echo %O2%        [*] Auto Registering Uninstaller Keys...%RESET%
 
 :: 1. Check for Administrative Privileges before writing to HKLM
 net session >nul 2>&1
@@ -175,17 +170,16 @@ echo %O2%        [AVIS] Saving config and completing registration...%RESET%
 reg add "HKCU\Environment" /v "dc2url_path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
 reg add "HKCU\Environment" /v "dc2url" /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
 
-powershell -NoProfile -InputFormat None -Command "$ErrorActionPreference='SilentlyContinue'; $m=[System.Environment]::GetEnvironmentVariable('PATH','Machine') -split ';'; if($m -notcontains '%FINAL_EXEC_DIR%' -and $m -ne ''){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$m) -join ';'),'Machine') }" >nul 2>&1
-powershell -NoProfile -InputFormat None -Command "$ErrorActionPreference='SilentlyContinue'; $p=[System.Environment]::GetEnvironmentVariable('PATH','User') -split ';'; if($p -notcontains '%FINAL_EXEC_DIR%' -and $p -ne ''){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$p) -join ';'),'User') }" >nul 2>&1
+:: Properly prepend FINAL_EXEC_DIR to PATH without duplicates
+powershell -NoProfile -InputFormat None -Command "$ErrorActionPreference='SilentlyContinue'; $m=[System.Environment]::GetEnvironmentVariable('PATH','Machine') -split ';' | Where-Object {$_ -ne ''}; if($m -notcontains '%FINAL_EXEC_DIR%'){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$m) -join ';'),'Machine') }" >nul 2>&1
+powershell -NoProfile -InputFormat None -Command "$ErrorActionPreference='SilentlyContinue'; $p=[System.Environment]::GetEnvironmentVariable('PATH','User') -split ';' | Where-Object {$_ -ne ''}; if($p -notcontains '%FINAL_EXEC_DIR%'){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$p) -join ';'),'User') }" >nul 2>&1
 
 echo %O2%        [*] Broadcasting environment update to Windows Shell...%RESET%
 powershell -NoProfile -InputFormat None -Command "$api = '[DllImport(\"user32.dll\", SetLastError=true)] public static extern bool SendNotifyMessage(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam);'; $type = Add-Type -MemberDefinition $api -Name 'Win32' -Namespace 'Win32Functions' -PassThru; [Win32Functions.Win32]::SendNotifyMessage([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment') | Out-Null" >nul 2>&1
 
-echo                    [SUCCESS] dc2url is now fully installed and at your command!
-echo.
+                    [SUCCESS] dc2url is now fully installed and at your command!
+<br>
 
-
- 
 set "MIDI_OUTPUT=%BASE_DIR%\sound\transformers.mid"
 if not exist "%BASE_DIR%\sound" mkdir "%BASE_DIR%\sound"
 
