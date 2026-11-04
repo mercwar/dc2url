@@ -121,7 +121,7 @@ reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
 
-echo %O2%        [*] Auto Registering dc2url into Windows Installed Apps...%RESET%
+echo %O2%        [*] Auto Registration...%RESET%
 
 :: ============================================================================
 :: ROBUST REGISTRY INSTALLER BLOCK FOR DC2URL
@@ -134,7 +134,7 @@ if %errorlevel% neq 0 (
     goto :REGISTER_HKCU
 )
 
-echo [*] Auto Registering dc2url into HKLM Apps Hive...
+echo [*] Auto Registering dc2url into HKLM Apps ...
 for %%K in (
     "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 ) do (
@@ -150,7 +150,7 @@ for %%K in (
 )
 
 :REGISTER_HKCU
-echo [*] Auto Registering dc2url into HKCU User Apps Hive...
+echo [*] Auto Registering dc2url into HKCU User Apps ...
 for %%K in (
     "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 ) do (
