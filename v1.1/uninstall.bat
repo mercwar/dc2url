@@ -55,7 +55,6 @@ echo %O2%    ===================================================================
 echo %Y2%                        dc2url Core Cyborg Ecosystem Uninstaller%RESET%
 echo %O2%    ====================================================================================%RESET%
 echo.
-
 echo %O2%        [*] Terminating active dc2url and WebView2 processes...%RESET%
 taskkill /f /im dc2url.exe >nul 2>&1
 taskkill /f /im darkcom2.exe >nul 2>&1
@@ -67,8 +66,8 @@ reg delete "HKLM\SOFTWARE\Classes\dc2url" /f /reg:64 >nul 2>&1
 reg delete "HKLM\SOFTWARE\Classes\dc2url" /f /reg:32 >nul 2>&1
 reg delete "HKLM\SOFTWARE\Wow6432Node\Classes\dc2url" /f /reg:64 >nul 2>&1
 
-echo %O2%        [*] Forcefully removing Add/Remove Programs keys across all hives...%RESET%
-:: Explicit architecture-targeted registry deletions for Uninstall and App Paths
+echo %O2%        [*] Forcefully wiping Add/Remove Programs keys across all architecture hives...%RESET%
+:: Explicit architecture-targeted registry deletions for Uninstall keys matching setup.bat
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:64 >nul 2>&1
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:32 >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:64 >nul 2>&1
