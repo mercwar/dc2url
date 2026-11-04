@@ -195,7 +195,7 @@ reg add "%L3%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
 reg add "%L3%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
 reg add "%L3%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%L3%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
-echo %O2%        [3 of 5 ...%RESET%
+echo %O2%        [3] of 5 ...%RESET%
 :: Location 4: HKCU 32-Bit / Wow6432Node User Hive
 set "L4=HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 reg add "%L4%" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
