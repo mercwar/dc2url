@@ -24,7 +24,7 @@ for %%I in ("%VERSION_DIR%\..") do set "BASE_DIR=%%~fI"
 
 set "FINAL_EXEC_DIR=%VERSION_DIR%\exec"
 
-title InstallShield (R) Uninstaller v1.2 :: dc2url Master Deployment Engine
+title InstallShield (R) Uninstaller v1.3 :: dc2url Master Deployment Engine
 mode con: cols=120 lines=34
 
 chcp 65001 >nul 2>&1
@@ -67,8 +67,8 @@ reg delete "HKLM\SOFTWARE\Classes\dc2url" /f /reg:64 >nul 2>&1
 reg delete "HKLM\SOFTWARE\Classes\dc2url" /f /reg:32 >nul 2>&1
 reg delete "HKLM\SOFTWARE\Wow6432Node\Classes\dc2url" /f /reg:64 >nul 2>&1
 
-echo %O2%        [*] Purging Add/Remove Programs and App Paths entries (64-bit / 32-bit views)...%RESET%
-:: Explicit architecture-targeted registry deletions to guarantee uninstaller list removal
+echo %O2%        [*] Forcefully removing Add/Remove Programs keys across all hives...%RESET%
+:: Explicit architecture-targeted registry deletions for Uninstall and App Paths
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:64 >nul 2>&1
 reg delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:32 >nul 2>&1
 reg delete "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /f /reg:64 >nul 2>&1
@@ -98,8 +98,7 @@ if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" del /f /q "%FINAL_EXEC_DIR%\dc2ws2.dll" >
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" del /f /q "%FINAL_EXEC_DIR%\DarkComHeadless.dll" >nul 2>&1
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" del /f /q "%FINAL_EXEC_DIR%\WebView2Loader.dll" >nul 2>&1
 
-:: Purge local WebView2 cache generated during execution
-if exist "%TEMP%\DarkCom2_Cache" rmdir /s /q "%TEMP%\DarkCom2_Cache" >nul 2>&1
+
 
 echo                     [SUCCESS] dc2url components have been completely uninstalled.
 echo.
