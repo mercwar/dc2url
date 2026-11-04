@@ -97,9 +97,7 @@ echo                    [SUCCESS] installed 'dc2url.bat' successfully.
 :: ============================================================
 :: PHASE 3: REGISTRY SANITIZATION & PROTOCOL REGISTER
 :: ============================================================
-echo %O2%        [*] Purging Legacy Local App Registry Conflicts...%RESET%
-reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
-reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
+
 
 echo %O2%        [*] Registering Official URI Protocol Handler...%RESET%
 reg add "HKLM\SOFTWARE\Classes\dc2url" /ve /t REG_SZ /d "URL:dc2url Protocol" /f /reg:64 >nul 2>&1
@@ -114,28 +112,46 @@ reg add "HKCU\Software\dc2url\Launcher" /v "HeadlessEngine" /t REG_SZ /d "%FINAL
 :: Global Native Redirections
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
-reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
 
 :: SysWOW64 Redundancy Safety Layers
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
-reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
-reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
 
 echo %O2%        [*] Auto Registering dc2url into Windows Installed Apps...%RESET%
-for %%H in (HKLM HKCU) do (
-    for %%N in ("" "\Wow6432Node") do (
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f /reg:64 >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" /f /reg:64 >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f /reg:64 >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f /reg:64 >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-        reg add "%%H%%~N\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-    )
+
+:: Flattened Loop Targets to Prevent Syntax Breaks
+for %%K in (
+    "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+    "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+) do (
+    reg add "%%~K" /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
+    reg add "%%~K" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f /reg:64 >nul 2>&1
+    reg add "%%~K" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" /f /reg:64 >nul 2>&1
+    reg add "%%~K" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f /reg:64 >nul 2>&1
+    reg add "%%~K" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f /reg:64 >nul 2>&1
+    reg add "%%~K" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
+    reg add "%%~K" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
+    reg add "%%~K" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+    reg add "%%~K" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
+)
+
+for %%K in (
+    "HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+    "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
+) do (
+    reg add "%%~K" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
+    reg add "%%~K" /v "UninstallString" /t REG_SZ /d "\"%VERSION_DIR%\uninstall.bat\"" /f >nul 2>&1
+    reg add "%%~K" /v "InstallLocation" /t REG_SZ /d "%VERSION_DIR%\" /f >nul 2>&1
+    reg add "%%~K" /v "DisplayIcon" /t REG_SZ /d "%BASE_DIR%\favi-con.ico" /f >nul 2>&1
+    reg add "%%~K" /v "DisplayVersion" /t REG_SZ /d "%VERSION_NAME%" /f >nul 2>&1
+    reg add "%%~K" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
+    reg add "%%~K" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
+    reg add "%%~K" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
+    reg add "%%~K" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
 )
 
 :: ============================================================
@@ -146,14 +162,15 @@ echo %O2%        [AVIS] Saving config and completing registration...%RESET%
 reg add "HKCU\Environment" /v "dc2url_path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
 reg add "HKCU\Environment" /v "dc2url" /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
 
-powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; $m=[System.Environment]::GetEnvironmentVariable('PATH','Machine') -split ';'; if($m -notcontains '%FINAL_EXEC_DIR%' -and $m -ne ''){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$m) -join ';'),'Machine') }" >nul 2>&1
-powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; $p=[System.Environment]::GetEnvironmentVariable('PATH','User') -split ';'; if($p -notcontains '%FINAL_EXEC_DIR%' -and $p -ne ''){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$p) -join ';'),'User') }" >nul 2>&1
+powershell -NoProfile -InputFormat None -Command "$ErrorActionPreference='SilentlyContinue'; $m=[System.Environment]::GetEnvironmentVariable('PATH','Machine') -split ';'; if($m -notcontains '%FINAL_EXEC_DIR%' -and $m -ne ''){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$m) -join ';'),'Machine') }" >nul 2>&1
+powershell -NoProfile -InputFormat None -Command "$ErrorActionPreference='SilentlyContinue'; $p=[System.Environment]::GetEnvironmentVariable('PATH','User') -split ';'; if($p -notcontains '%FINAL_EXEC_DIR%' -and $p -ne ''){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$p) -join ';'),'User') }" >nul 2>&1
 
-:: Force shell propagation broadcast
-powershell -NoProfile -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
+echo %O2%        [*] Broadcasting environment update to Windows Shell...%RESET%
+powershell -NoProfile -InputFormat None -Command "$api = '[DllImport(\"user32.dll\", SetLastError=true)] public static extern bool SendNotifyMessage(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam);'; $type = Add-Type -MemberDefinition $api -Name 'Win32' -Namespace 'Win32Functions' -PassThru; [Win32Functions.Win32]::SendNotifyMessage([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment') | Out-Null" >nul 2>&1
 
 echo                    [SUCCESS] dc2url is now fully installed and at your command!
 echo.
+
 
  
 set "MIDI_OUTPUT=%BASE_DIR%\sound\transformers.mid"
