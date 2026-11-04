@@ -98,6 +98,7 @@ echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
 echo %O2%                [SUCCESS] installed 'dc2url.bat' successfully.%RESET%
 echo.
+
 :: ============================================================
 :: PHASE 3: REGISTRY SANITIZATION & PROTOCOL REGISTER
 :: ============================================================
@@ -111,49 +112,49 @@ reg add "HKCU\Software\dc2url\Launcher" /v "InstallPath" /t REG_SZ /d "%FINAL_EX
 reg add "HKCU\Software\dc2url\Launcher" /v "NetworkSubsystem" /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2ws2.dll" /f >nul 2>&1
 reg add "HKCU\Software\dc2url\Launcher" /v "HeadlessEngine" /t REG_SZ /d "%FINAL_EXEC_DIR%\DarkComHeadless.dll" /f >nul 2>&1
 
-:: Global Native Redirections (Shell / Run Dialog Integration)
+:: Global Native Redirections (.EXE Shell / Run Dialog Integration)
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
 reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
 reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
 
+:: Global Native Redirections (.BAT Shell / Core DOS Batch Interceptor Integration)
+reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /ve /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2url.bat" /f /reg:64 >nul 2>&1
+reg add "HKLM\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /ve /t REG_SZ /d "%FINAL_EXEC_DIR%\dc2url.bat" /f >nul 2>&1
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.bat" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
+
 :: SysWOW64 Redundancy Safety Layers
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f /reg:64 >nul 2>&1
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
-reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
+reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 echo.
+
 :: ============================================================
 :: PHASE 4: NATIVE DOS/CLI ENVIRONMENT PATH REGISTRATION
 :: ============================================================
 echo %O2%        [*] Registering global system execution paths for cmd/PowerShell...%RESET%
 
-:: Check for Administrative Privileges before writing system environment variables
+:: Core DOS Variables Injection
+reg add "HKCU\Environment" /v "dc2url" /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
+reg add "HKCU\Environment" /v "dc2url_path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
+
+:: Appending to User PATH environment variable cleanly using PowerShell to protect length limits
+powershell -NoProfile -Command "$p=[System.Environment]::GetEnvironmentVariable('PATH','User') -split ';' | Where-Object {$_ -ne ''}; if($p -notcontains '%FINAL_EXEC_DIR%'){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$p) -join ';'),'User') }" >nul 2>&1
+
+:: Check privilege context for system-wide assignment, but NEVER skip over registration entries
 net session >nul 2>&1
 if %errorlevel% neq 0 (
-    echo %O1%        [WARNING] Running in standard user context. Modifying User Path variable only...%RESET%
-    
-    :: Safely append to User PATH environment variable
-    for /f "tokens=2*" %%A in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "OLD_USER_PATH=%%B"
-    if defined OLD_USER_PATH (
-        echo !OLD_USER_PATH! | findstr /I /C:"%FINAL_EXEC_DIR%" >nul || (
-            setx PATH "!OLD_USER_PATH!;%FINAL_EXEC_DIR%" >nul
-        )
-    ) else (
-        setx PATH "%FINAL_EXEC_DIR%" >nul
-    )
-    goto :INSTALL_USER_ONLY
+    echo %O1%        [WARNING] Running in standard user context. Skipping System-Level variables, populating all 5 hives...%RESET%
+    goto :POPULATE_ALL_UNINSTALL_HIVES
 )
 
-:: Admin Context: Update System-Wide PATH for all users
-for /f "tokens=2*" %%A in ('reg query "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "OLD_SYS_PATH=%%B"
-if defined OLD_SYS_PATH (
-    echo !OLD_SYS_PATH! | findstr /I /C:"%FINAL_EXEC_DIR%" >nul || (
-        setx PATH "!OLD_SYS_PATH!;%FINAL_EXEC_DIR%" /m >nul
-    )
-) else (
-    setx PATH "%FINAL_EXEC_DIR%" /m >nul
-)
+:: Admin Context Execution paths setup
+reg add "HKLM\System\CurrentControlSet\Control\Session Manager\Environment" /v "dc2url_path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
+powershell -NoProfile -Command "$m=[System.Environment]::GetEnvironmentVariable('PATH','Machine') -split ';' | Where-Object {$_ -ne ''}; if($m -notcontains '%FINAL_EXEC_DIR%'){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$m) -join ';'),'Machine') }" >nul 2>&1
+
+:POPULATE_ALL_UNINSTALL_HIVES
 echo.
 echo %O2%        [*] Auto Registering Uninstaller Keys...%RESET%
 echo %O2%        [*] Auto Registering dc2url into all 5 Registry Architecture Locations...%RESET%
