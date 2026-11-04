@@ -97,7 +97,7 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
 echo %O2%                [SUCCESS] installed 'dc2url.bat' successfully.%RESET%
-
+echo.
 :: ============================================================
 :: PHASE 3: REGISTRY SANITIZATION & PROTOCOL REGISTER
 :: ============================================================
@@ -122,7 +122,7 @@ reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc
 reg add "HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f /reg:64 >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /ve /t REG_SZ /d "%FINAL_EXE_PATH%" /f >nul 2>&1
 reg add "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /v "Path" /t REG_SZ /d "%FINAL_EXEC_DIR%" /f >nul 2>&1
-
+echo.
 :: ============================================================
 :: PHASE 4: NATIVE DOS/CLI ENVIRONMENT PATH REGISTRATION
 :: ============================================================
@@ -154,7 +154,7 @@ if defined OLD_SYS_PATH (
 ) else (
     setx PATH "%FINAL_EXEC_DIR%" /m >nul
 )
-
+echo.
 echo %O2%        [*] Auto Registering Uninstaller Keys...%RESET%
 echo %O2%        [*] Auto Registering dc2url into all 5 Registry Architecture Locations...%RESET%
 
@@ -169,7 +169,7 @@ reg add "%L1%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
 reg add "%L1%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
 reg add "%L1%" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
 reg add "%L1%" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-
+echo %O2%        [%] 20 ...%RESET%
 :: Location 2: HKLM 32-Bit / Wow6432Node
 set "L2=HKLM\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 reg add "%L2%" /v "DisplayName" /t REG_SZ /d "dc2url" /f /reg:64 >nul 2>&1
@@ -181,7 +181,7 @@ reg add "%L2%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f /reg:64 >nul 2>&1
 reg add "%L2%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f /reg:64 >nul 2>&1
 reg add "%L2%" /v "NoModify" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
 reg add "%L2%" /v "NoRepair" /t REG_DWORD /d 1 /f /reg:64 >nul 2>&1
-
+echo %O2%        [%] 40 ...%RESET%
 :INSTALL_USER_ONLY
 :: Location 3: HKCU Standard User Hive
 set "L3=HKCU\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
@@ -194,7 +194,7 @@ reg add "%L3%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
 reg add "%L3%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
 reg add "%L3%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%L3%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
-
+echo %O2%        [%] 60 ...%RESET%
 :: Location 4: HKCU 32-Bit / Wow6432Node User Hive
 set "L4=HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 reg add "%L4%" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
@@ -206,7 +206,7 @@ reg add "%L4%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
 reg add "%L4%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
 reg add "%L4%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%L4%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
-
+echo %O2%        [%] 80 ...%RESET%
 :: Location 5: HKCU Classes Hive
 set "L5=HKCU\Software\Classes\Software\Microsoft\Windows\CurrentVersion\Uninstall\dc2url"
 reg add "%L5%" /v "DisplayName" /t REG_SZ /d "dc2url" /f >nul 2>&1
@@ -218,7 +218,7 @@ reg add "%L5%" /v "Publisher" /t REG_SZ /d "Mercwar AI" /f >nul 2>&1
 reg add "%L5%" /v "EstimatedSize" /t REG_DWORD /d 1024 /f >nul 2>&1
 reg add "%L5%" /v "NoModify" /t REG_DWORD /d 1 /f >nul 2>&1
 reg add "%L5%" /v "NoRepair" /t REG_DWORD /d 1 /f >nul 2>&1
-
+echo %O2%        [%] 100 ...%RESET%
 :finish
 echo %O2%        [COMPLETE] Deployment phase ended successfully.%RESET%
 endlocal
@@ -268,7 +268,7 @@ echo %TXT%        Your copy of dc2url in now installed cmd:\ dc2url -nojs [curl 
 echo.
 
 if not exist "%BASE_DIR%\setup.bat" goto :no_setup
-
+echo.
 choice /c YN /n /m "%O2%                [?] Update/Install/Re-install Eclipse for dc2url v1.1 ? (Y/N)%RESET%"
 
 if errorlevel 2 goto :skip_setup
@@ -280,10 +280,13 @@ call "%BASE_DIR%\setup.bat"
 goto :setup_end
 
 :skip_setup
+echo.
 echo %Y2%                [INFO] Exiting...%RESET%
 goto :setup_end
 
+
 :no_setup
+echo.
 echo %Y2%                        [error] Check Installation %FINAL_EXEC_DIR%.%RESET%
 
 :setup_end
