@@ -60,7 +60,6 @@ echo %Y1%        ██║  ██║██╔══██║██╔══█�
 echo %Y2%        ██████╔╝██║  ██║██║  ██║██║  ██║ ╚██████╗╚██████╔╝██║ ╚═╝ ██║███████╗%RESET%
 echo %Y2%        ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝  ╚═════╝ ╚═════╝ ╚═╝     ╚═╝╚══════╝%RESET%
 echo.
-
 echo %O2%    ====================================================================================%RESET%
 echo %Y2%                        dc2url Core Cyborg Ecosystem Installer%RESET%
 echo %O2%    ====================================================================================%RESET%
@@ -88,6 +87,11 @@ if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
 echo @echo off > "%FINAL_EXEC_DIR%\dc2url.bat"
 echo "%FINAL_EXEC_DIR%\dc2url.exe" %%* >> "%FINAL_EXEC_DIR%\dc2url.bat"
 echo                    [SUCCESS] installed 'dc2url.bat' successfully.
+
+echo %O2%        [*] Purging Legacy Local App Registry Conflicts...%RESET%
+:: Remove the fake or cached configurations before setting the new official targets
+reg delete "HKCU\Software\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
+reg delete "HKCU\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\App Paths\dc2url.exe" /f >nul 2>&1
 
 echo %O2%        [*] Auto Configuring dc2url for Windows App Paths...%RESET%
 
@@ -133,7 +137,7 @@ powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; $m=[S
 :: User PATH registration to ensure persistence regardless of admin execution level
 powershell -NoProfile -Command "$ErrorActionPreference='SilentlyContinue'; $p=[System.Environment]::GetEnvironmentVariable('PATH','User') -split ';'; if($p -notcontains '%FINAL_EXEC_DIR%' -and $p -ne ''){ [System.Environment]::SetEnvironmentVariable('PATH',((@('%FINAL_EXEC_DIR%')+$p) -join ';'),'User') }" >nul 2>&1
 
-:: Global window message broadcast to flash and update running shell configurations instantly
+:: Force environment propagation to sync running instances (Notepad++, consoles, wrappers)
 powershell -NoProfile -Command "$advapi = '[DllImport(\"user32.dll\",SetLastError=true)]public static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint Msg, IntPtr wParam, String lParam, uint fuFlags, uint uTimeout, out IntPtr lpdwResult);'; $type = Add-Type -MemberDefinition $advapi -Name 'Win32' -Namespace 'Win32Functions' -PassThru; $res = [IntPtr]::Zero; [Win32Functions.Win32]::SendMessageTimeout([IntPtr]0xffff, 0x001A, [IntPtr]::Zero, 'Environment', 2, 5000, [out]$res)" >nul 2>&1
 
 echo                    [SUCCESS] dc2url is now fully installed and at your command!
