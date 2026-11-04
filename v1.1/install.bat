@@ -81,13 +81,13 @@ icacls "%VERSION_DIR%" /grant Users:(OI)(CI)F /t >nul 2>&1
 :: ============================================================
 echo %O2%        [*] Processing OLE/COM and System DLL Registrations...%RESET%
 if exist "%FINAL_EXEC_DIR%\dc2ws2.dll" (
-                        [SUCCESS] dc2ws2.dll network subsystem ready.
+echo %O2%                            [SUCCESS] dc2ws2.dll network subsystem ready.%RESET%
 )
 if exist "%FINAL_EXEC_DIR%\DarkComHeadless.dll" (
-                        [SUCCESS] DarkComHeadless.dll ready.
+echo %O2%                            [SUCCESS] DarkComHeadless.dll ready.%RESET%
 )
 if exist "%FINAL_EXEC_DIR%\WebView2Loader.dll" (
-                        [SUCCESS] WebView2Loader.dll ready.
+ echo %O2%                           [SUCCESS] WebView2Loader.dll ready.%RESET%
 )
 
 :: Generate wrapper execution path targets
