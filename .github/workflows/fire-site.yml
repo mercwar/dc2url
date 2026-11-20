@@ -1,49 +1,44 @@
-name: "MERCWAR :: SITE-MAP-DISPATCH"
+name: Generate Sitemap
 
 on:
   push:
-    branches: [ main ]
+    branches:
+      - main
     paths-ignore:
       - 'sitemap.xml'
   workflow_dispatch:
 
-jobs:
-  sentinel-dispatch:
-    name: "MERCWAR :: Sentinel Dispatch"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
+permissions:
+  contents: write
 
+jobs:
+  build-sitemap:
+    runs-on: ubuntu-latest
     steps:
-      - name: "MERCWAR :: Checkout"
+      - name: Checkout repository (no submodules)
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
           submodules: false
 
-      - name: "MERCWAR :: Execute Sitemap Script"
+      - name: Run fire-site.sh
         run: |
-          cd "${GITHUB_WORKSPACE}"
-
           if [ -f "./fire-site.sh" ]; then
-            chmod +x ./fire-site.sh
-            ./fire-site.sh
+            bash ./fire-site.sh
+          elif [ -f "./sitemap.sh" ]; then
+            bash ./sitemap.sh
           else
-            echo "::error::MERCWAR FATAL: fire-site.sh NOT FOUND at $(pwd)"
-            ls -la
+            echo "Error: Neither fire-site.sh nor sitemap.sh found in repository root."
             exit 1
           fi
 
-      - name: "MERCWAR :: Commit & Push"
+      - name: Commit and push sitemap.xml
         run: |
-          git config user.name "MERCWAR-Automaton"
-          git config user.email "mercwar@github.local"
-
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@://github.com"
           git add sitemap.xml
-
-          if ! git diff --staged --quiet; then
-            git commit -m "MERCWAR: Automated sitemap update [skip ci]"
-            git push
+          if git diff --staged --quiet; then
+            echo "No changes to sitemap.xml"
           else
-            echo "MERCWAR: No changes to commit."
+            git commit -m "Update sitemap.xml"
+            git push
           fi
