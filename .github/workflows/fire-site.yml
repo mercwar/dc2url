@@ -1,53 +1,49 @@
-# /* AVIS_COORD: AVIS://GITHUB/WORKFLOW/XML_GEN/1.0 */
-# /* ROLE: Automated XML Sentinel Dispatch */
-# /* path: .github/workflows/fire-site.yml */
-
-name: "ROBO-ROOK :: XML-SITEMAP-DISPATCH"
+name: "MERCWAR :: SITE-MAP-DISPATCH"
 
 on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'sitemap.xml'
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  map_repository:
-    name: "ROBO-ROOK :: Recursive XML Mapping"
+  sentinel-dispatch:
+    name: "MERCWAR :: Sentinel Dispatch"
     runs-on: ubuntu-latest
-    if: github.actor != 'github-actions[bot]'
+    permissions:
+      contents: write
 
     steps:
-      - name: "SENTINEL :: Checkout Authority"
+      - name: "MERCWAR :: Checkout"
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: false
 
-      - name: "SENTINEL :: Execute fire-site.sh"
+      - name: "MERCWAR :: Execute Sitemap Script"
         run: |
-          chmod +x ./fire-site.sh
-          ./fire-site.sh
+          cd "${GITHUB_WORKSPACE}"
 
-      - name: "SENTINEL :: Commit XML Artifact"
-        run: |
-          git config --global user.name "Sentinel-Bot"
-          git config --global user.email "bot@robo-rook.sentinel"
-          
-          # Stage the map
-          git add sitemap.xml
-          
-          # Check for changes
-          if ! git diff --staged --quiet; then
-            git commit -m "sitemap.xml updated [recursive map] [skip ci]"
-            
-            # Clean workspace for rebase
-            git stash --include-untracked || true
-            
-            # Synchronize with main
-            git pull --rebase origin main
-            
-            # Final Dispatch
-            git push origin main
-            echo "wm_macro_ack: XML dispatched to Audit Surface."
+          if [ -f "./sitemap.sh" ]; then
+            chmod +x ./fire-site.sh
+            ./fire-site.sh
           else
-            echo "AVIS: No structural shifts detected. Pulse steady."
+            echo "::error::MERCWAR FATAL: fire-site.sh NOT FOUND at $(pwd)"
+            ls -la
+            exit 1
+          fi
+
+      - name: "MERCWAR :: Commit & Push"
+        run: |
+          git config user.name "MERCWAR-Automaton"
+          git config user.email "mercwar@github.local"
+
+          git add sitemap.xml
+
+          if ! git diff --staged --quiet; then
+            git commit -m "MERCWAR: Automated sitemap update [skip ci]"
+            git push
+          else
+            echo "MERCWAR: No changes to commit."
           fi
