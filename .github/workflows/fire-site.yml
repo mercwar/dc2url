@@ -25,7 +25,7 @@ jobs:
         run: |
           cd "${GITHUB_WORKSPACE}"
 
-          if [ -f "./sitemap.sh" ]; then
+          if [ -f "./fire-site.sh" ]; then
             chmod +x ./fire-site.sh
             ./fire-site.sh
           else
