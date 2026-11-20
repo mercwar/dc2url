@@ -1,0 +1,3 @@
+[submodule "AVIS-DATALAKE"]
+	path = AVIS-DATALAKE
+	url = https://github.com{name}.git
