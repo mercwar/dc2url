@@ -1,44 +1,65 @@
-name: Generate Sitemap
+name: "MERCWAR :: SITE-MAP-DISPATCH"
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
     paths-ignore:
       - 'sitemap.xml'
   workflow_dispatch:
 
-permissions:
-  contents: write
-
 jobs:
-  build-sitemap:
+  sentinel-dispatch:
+    name: "MERCWAR :: Sentinel Dispatch"
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
     steps:
-      - name: Checkout repository (no submodules)
+      - name: "MERCWAR :: Checkout"
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: false
 
-      - name: Run fire-site.sh
+      - name: "MERCWAR :: Repair All Submodule Mappings"
         run: |
+          git ls-files --stage | awk '$1 == "160000" {print $4}' | while read -r path; do
+            if ! git config -f .gitmodules --get "submodule.${path}.url" >/dev/null 2>&1; then
+              name=$(basename "$path")
+              git config -f .gitmodules "submodule.${path}.path" "$path"
+              git config -f .gitmodules "submodule.${path}.url" "https://github.com{name}.git"
+            fi
+          done
+          if [ -f ".gitmodules" ]; then
+            git submodule sync
+          fi
+
+      - name: "MERCWAR :: Execute Sitemap Script"
+        run: |
+          cd "${GITHUB_WORKSPACE}"
+
           if [ -f "./fire-site.sh" ]; then
-            bash ./fire-site.sh
-          elif [ -f "./sitemap.sh" ]; then
-            bash ./sitemap.sh
+            chmod +x ./fire-site.sh
+            ./fire-site.sh
           else
-            echo "Error: Neither fire-site.sh nor sitemap.sh found in repository root."
+            echo "::error::MERCWAR FATAL: fire-site.sh NOT FOUND at $(pwd)"
+            ls -la
             exit 1
           fi
 
-      - name: Commit and push sitemap.xml
+      - name: "MERCWAR :: Commit & Push"
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@://github.com"
+          git config user.name "MERCWAR-Automaton"
+          git config user.email "mercwar@github.local"
+
           git add sitemap.xml
-          if git diff --staged --quiet; then
-            echo "No changes to sitemap.xml"
-          else
-            git commit -m "Update sitemap.xml"
+          if [ -f ".gitmodules" ]; then
+            git add .gitmodules
+          fi
+
+          if ! git diff --staged --quiet; then
+            git commit -m "MERCWAR: Automated sitemap & submodule mapping update [skip ci]"
             git push
+          else
+            echo "MERCWAR: No changes to commit."
           fi
